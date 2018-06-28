@@ -1,3 +1,6 @@
+import random
+
+
 FREQ = 5
 DO_OST_TEST = True
 DO_VF_TEST = True
@@ -113,7 +116,7 @@ PROB_TABLE['has_vf_trt']['wf']['wf']  = 0.00247669
 
 
 
-self to_status_str(has_ost, has_vf, trt):
+def to_status_str(ost, vf, trt):
     if (not ost) and (not vf) and (not trt):
         return 'no_ost_no_trt'
     elif (not ost) and (not vf) and trt:
@@ -158,22 +161,132 @@ def ost_preval(age):
     else:
         return OST_PREVAL[80]
 
+def fx_preval(age):
+    return VF_PREVAL[50]
+
+def natual_death_rate(age):
+    if age < 60:
+        return 0.0027879
+    elif age < 65:
+        return 0.0039132
+    elif age < 70:
+        return 0.0057923
+    elif age < 75:
+        return 0.0093225
+    elif age < 80:
+        return 0.0152604
+    elif age < 85:
+        return 0.0264878
+    else:
+        return 0.0676953
+
+def fx_death_rate(fx, age):
+    if fx == 'vf':
+        if age < 80:
+            return 0.0335633
+        else:
+            return 0.0851230
+    elif fx == 'hip':
+        if age < 80:
+            return 0.0268606
+        else:
+            return 0.0851230
+    elif fx == 'wf':
+        if age < 80:
+            return 0.0045102
+        else:
+            return 0.031496
+    else:
+        raise Exception("unknown fx type")
+
+def drug_cost():
+    return 303
+
+def er_cost(fx, age):
+    if fx=='hip':
+        if age < 65:
+            return 28496 + 180
+        else:
+            return 18541 + 180
+    elif fx == 'vf':
+        if age < 65:
+            return 27320 + 180
+        else:
+            return 20190 + 180
+    elif fx == 'wf':
+        if age < 65:
+            return 5088 + 180
+        else:
+            return 3486 + 180
+    else:
+        raise Exception("unknown fx")
+
+def ost_cost():
+    return 120
+
+def vf_cost():
+    return 86
+
+def utility(fx, age):
+    if fx in ['no', 'wf']:
+        if age < 60:
+            return 0.937
+        elif age < 70:
+            return 0.911
+        elif age < 80:
+            return 0.871
+        elif age < 90:
+            return 0.824
+        else:
+            return 0.8
+    elif fx == 'hip':
+        if age < 60:
+            return 0.737
+        elif age < 70:
+            return 0.711
+        elif age < 80:
+            return 0.671
+        elif age < 90:
+            return 0.624
+        else:
+            return 0.6
+    elif fx == 'hip':
+        if age < 60:
+            return 0.837
+        elif age < 70:
+            return 0.811
+        elif age < 80:
+            return 0.771
+        elif age < 90:
+            return 0.724
+        else:
+            return 0.7
+
+
+
+
+
 class Human(object):
     def __init__(self):
         self.age = 55
         self.next_test_age = self.age + FREQ
+        self.last_fx_age = 0
         self.utils = 0
         self.cost = 0
-        self.ost = False        
+        self.ost = False
         if random.random() < ost_preval(self.age):
             self.ost = True
         self.fx = 'no_fx'
-        if random.random() < preval(self.age):
+        if random.random() < fx_preval(self.age):
             self.fx = 'vf'
         self.trt = None
         self.ost_test = None
         self.vf_test = None
-    
+        self.stop = False
+
+    def __str__(self):
+        return "age={:4},next_test_age={:4},last_fx_age={:4},utils={:8},cost={:8},ost={:6},fx={:6},trt={:6},ost_test={:6},vf_test={:6}".format(self.age, self.next_test_age, self.last_fx_age, self.utils, self.cost, str(self.ost), self.fx, str(self.trt), self.ost_test, self.vf_test)
+
     def lab_test(self):
         self.trt = None
         self.ost_test = None
@@ -182,11 +295,11 @@ class Human(object):
         if self.fx != 'no_fx':
             self.ost_test = 'Pos'
             self.trt = True
-        # if no fracture.         
+        # if no fracture.
         elif DO_OST_TEST:
-            if self.has_ost:
-                #  if has ost, OST_SENSI chance positve test result. 
-                if random.random() < OST_SENSI: 
+            if self.ost:
+                #  if has ost, OST_SENSI chance positve test result.
+                if random.random() < OST_SENSI:
                     self.ost_test = 'Pos'
                     self.trt = True
                 else:
@@ -199,38 +312,67 @@ class Human(object):
                 else:
                     self.ost_test = 'Neg'
                     self.trt = False
-            
+
             if DO_VF_TEST and self.ost_test == 'Neg':
                 if self.fx == 'vf':
-                    if random.random() < VF_SENSI: 
+                    if random.random() < VF_SENSI:
                         self.vf_test = 'Pos'
                         self.trt = True
                     else:
                         self.vf_test = 'Neg'
-                        self.trt = False                        
+                        self.trt = False
                 else:
                     if random.random() > VF_SPEC:
                         self.vf_test = 'Pos'
                         self.trt = True
                     else:
                         self.vf_test = 'Neg'
-                        self.trt = False              
-            
+                        self.trt = False
+
         if self.trt is None:
             raise Exception("trt cannot be None")
         if DO_OST_TEST and (self.ost_test is None):
             raise Exception("everyone should have done OST TEST")
-        
+
+    def get_status_str(self):
+        has_vf = self.fx == 'vf'
+        return to_status_str(self.ost, has_vf, self.trt)
+
+    def add_cost(self):
+        if self.ost_test is not None:
+            self.cost += ost_cost()
+        if self.vf_test is not None:
+            self.cost += vf_cost()
+        if self.trt:
+            self.cost += drug_cost()
+        if self.fx != 'no_fx':
+            self.cost += er_cost(self.fx, self.age)
+
+
+
+
+    def state_transition(self):
+        if random.random() < natual_death_rate(self.age):
+            self.stop = True
+            return None
+        vector = PROB_TABLE[self.get_status_str()][self.fx]
+
+
 
     def next_cycle(self):
+        self.lab_test()
+        self.add_cost()
+
+
         self.age += 0.5
-        has_vf = self.fx == 'vf'
-        status_str = to_status_str(self.ost, has_vf, self.trt)
-        
-        
+
+
+if __name__ == '__main__':
+    h = Human()
+    for i in xrange(89):
+        print h
+        h.next_cycle()
 
 
 
 
-    
-    
