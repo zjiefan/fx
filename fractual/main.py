@@ -163,6 +163,8 @@ def fx_preval(age):
     return VF_PREVAL[50]
 
 def natual_death_rate(age):
+    #TODO: remove this
+    return 0
     if age < 60:
         return 0.0027879
     elif age < 65:
@@ -179,6 +181,8 @@ def natual_death_rate(age):
         return 0.0676953
 
 def fx_death_rate(fx, age):
+    #TODO: remove this
+    return 0
     if fx == 'vf':
         if age < 80:
             return 0.0335633
@@ -198,7 +202,8 @@ def fx_death_rate(fx, age):
         raise Exception("unknown fx type")
 
 def drug_cost():
-    return 150
+    #TODO: FIX me price
+    return 60
 
 def er_cost(fx, age):
     if fx=='hip':
@@ -270,7 +275,10 @@ def get_utility(fx, age):
 
 class Human(object):
     __slots__ = ('test_freq', 'do_ost_test', 'do_vf_test',
-    'age', 'next_test_age', 'last_fx_age', 'utils', 'cost', 'ost', 'fx', 'trt', 'ost_test', 'vf_test')
+    'age', 'next_test_age', 'last_fx_age', 'utils', 'cost', 'ost', 'fx', 'trt', 'ost_test', 'vf_test',
+    'vf_cnt', 'hip_cnt', 'wf_cnt', 'trt_cnt'
+
+    )
     def __init__(self, test_freq=None, do_ost_test=None, do_vf_test=None):
         self.test_freq = test_freq
         self.do_ost_test = do_ost_test
@@ -281,6 +289,10 @@ class Human(object):
         self.last_fx_age = 0
         self.utils = 0
         self.cost = 0
+        self.vf_cnt = 0
+        self.hip_cnt = 0
+        self.wf_cnt = 0
+        self.trt_cnt = 0
         self.ost = False
         if random.random() < ost_preval(self.age):
             self.ost = True
@@ -293,11 +305,15 @@ class Human(object):
 
     def __str__(self):
         if self.fx != 'death':
-            return "age={:4},next_test_age={:5},last_fx_age={:4},utils={:8},cost={:8},ost={:6},fx={:6},trt={:6},ost_test={:6},vf_test={:6}".format(self.age, self.next_test_age, self.last_fx_age, self.utils, self.cost, str(self.ost), self.fx, str(self.trt), self.ost_test, self.vf_test)
+            return "age={:4},next_test_age={:5},last_fx_age={:4},utils={:8},cost={:8},ost={:6},fx={:6},trt={:6},ost_test={:6},vf_test={:6},hip_cnt={},vf_cnt={},wf_cnt={},trt_cnt={}".format(
+                self.age, self.next_test_age, self.last_fx_age, self.utils, self.cost, str(self.ost), self.fx, str(self.trt), self.ost_test, self.vf_test, self.hip_cnt, self.vf_cnt,self.wf_cnt,self.trt_cnt)
         else:
             return "age={:4},next_test_age={:5},last_fx_age={:4},utils={:8},cost={:8},ost={:6},fx={:6}".format(self.age, self.next_test_age, self.last_fx_age, self.utils, self.cost, str(self.ost), self.fx)
 
     def lab_test(self):
+        # #TODO delete
+        # print self.fx
+
         do_test = False
         if self.next_test_age is None:
             do_test = True
@@ -310,13 +326,15 @@ class Human(object):
         self.ost_test = None
         self.vf_test = None
 
+        # if there is fx, ost is test is always positive, and therefore get treatment
+        #TODO: enable this
+        # if self.fx != 'no_fx':
+        #     self.ost_test = 'Pos'
+        #     self.trt = True
+
         if do_test:
-            # if there is fx, ost is test is always positive, and therefore get treatment
-            if self.fx != 'no_fx':
-                self.ost_test = 'Pos'
-                self.trt = True
             # if no fracture.
-            elif self.do_ost_test:
+            if self.do_ost_test:
                 if self.ost:
                     #  if has ost, OST_SENSI chance positve test result.
                     if random.random() < OST_SENSI:
@@ -365,6 +383,14 @@ class Human(object):
             self.cost += vf_cost()
         if self.trt:
             self.cost += drug_cost()
+            self.trt_cnt += 1
+
+        if self.fx == 'vf':
+            self.vf_cnt += 1
+        elif self.fx == 'hip':
+            self.hip_cnt += 1
+        elif self.fx == 'wf':
+            self.wf_cnt += 1
 
     def add_utils(self):
         util = get_utility(self.fx,self.age)
@@ -373,11 +399,14 @@ class Human(object):
 
 
 
-    def state_transition(self):
+    def state_transition(self, prt=False):
+        ret = None
         if random.random() < natual_death_rate(self.age):
             self.fx = 'death'
-            return None
+            return ret
         vector = PROB_TABLE[self.get_status_str()][self.fx]
+        if prt:
+            ret = "use table {:20s}, {}, {}".format(self.get_status_str(), self.fx, str(vector))
 
         if self.fx == 'no_fx':
             prob_death = 0
@@ -388,52 +417,73 @@ class Human(object):
         prob_wf = vector['wf']
         prob_no_fix = 1 - prob_death - prob_hip - prob_vf - prob_wf
         self.fx = np.random.choice(['no_fx', 'hip', 'vf', 'wf', 'death'], p=[prob_no_fix, prob_hip, prob_vf, prob_wf, prob_death])
-        return None
+        # #TODO delete
+        # print self.fx
+        return ret
 
 
 
 
-    def next_cycle(self):
+    def next_cycle(self,prt=False):
         if self.fx!='death':
             self.lab_test()
             self.add_cost()
             self.add_utils()
-            self.state_transition()
+            trans_prt=self.state_transition(prt)
             if self.fx not in ['no_fx', 'death']:
-                self.cost += er_cost(self.fx, self.age)
+                # TODO: extra nursing
+                self.cost += er_cost(self.fx, self.age) + 12000
         self.age += 0.5
+        return trans_prt
 
     def do_life(self, prt=False):
         for i in xrange(89):
-            self.next_cycle()
+            cycle_prt=self.next_cycle(prt)
             if prt:
-                print self.__str__()
+                print "{}, ____________   {}".format(self.__str__(), cycle_prt)
             if self.fx == 'death':
                 break
+
 
 
 def do_group(sample_num, test_freq=None, do_ost_test=None, do_vf_test=None):
     total_cost = 0
     total_utils = 0
+    total_hip = 0
+    total_vf = 0
+    total_wf = 0
+    total_trt = 0
     for i in xrange(sample_num):
         h = Human(test_freq=test_freq, do_ost_test=do_ost_test, do_vf_test=do_vf_test)
         h.do_life()
         total_cost += h.cost
         total_utils += h.utils
+        total_hip += h.hip_cnt
+        total_vf += h.vf_cnt
+        total_wf += h.wf_cnt
+        total_trt += h.trt_cnt
+
     ave_cost = total_cost/sample_num
     ave_utils = total_utils/sample_num
-    print "samples={}, test_freq={}, do_ost_test={}, do_vf_test={}, ave_cost={}, ave_utils={}".format(sample_num, test_freq, do_ost_test, do_vf_test, ave_cost, ave_utils)
+    print "samples={}, test_freq={}, do_ost_test={}, do_vf_test={}, ave_cost={}, ave_utils={}, total_hip={}, total_vf={}, total_wf={}, total_trt={}".format(sample_num, test_freq, do_ost_test, do_vf_test, ave_cost, ave_utils, total_hip, total_vf, total_wf, total_trt)
 
 
-if __name__ == '__main__':
+def run_groups():
     SAMPLE_NUM = 1000*10
     do_group(SAMPLE_NUM, test_freq=5, do_ost_test=False, do_vf_test=False)
     do_group(SAMPLE_NUM, test_freq=5, do_ost_test=True, do_vf_test=False)
     do_group(SAMPLE_NUM, test_freq=5, do_ost_test=True, do_vf_test=True)
 
+def run_one_person():
+    h = Human(test_freq=5, do_ost_test=False, do_vf_test=False)
+    h.do_life(prt=True)
 
-    # h = Human(test_freq=5, do_ost_test=False, do_vf_test=False)
-    # h.do_life(prt=True)
+
+
+if __name__ == '__main__':
+    run_one_person()
+    #run_groups()
+
 
 
 
