@@ -304,7 +304,7 @@ class Human(object):
         if random.random() < vfa_preval(self.age):
             self.vfa = True
         self.fx = 'no_fx'
-        self.trt = None
+        self.trt = False
         self.ost_test = None
         self.vfa_test = None
         self.worst_fx = 'no_fx'
@@ -328,9 +328,6 @@ class Human(object):
             do_test = True
             self.next_test_age = self.age + self.test_freq
 
-        self.trt = False
-        self.ost_test = None
-        self.vfa_test = None
 
         # if there is fx, ost is test is always positive, and therefore get treatment
         #TODO: enable this
@@ -339,6 +336,9 @@ class Human(object):
         #     self.trt = True
 
         if do_test:
+            self.trt = False
+            self.ost_test = None
+            self.vfa_test = None
             # if no fracture.
             if self.do_ost_test:
                 if self.ost:
@@ -511,19 +511,19 @@ def do_group(sample_num, test_freq=None, do_ost_test=None, do_vf_test=None):
 
 
 def run_groups():
-    SAMPLE_NUM = 1000*490
+    SAMPLE_NUM = 1000*10
     do_group(SAMPLE_NUM, test_freq=5, do_ost_test=False, do_vf_test=False)
     do_group(SAMPLE_NUM, test_freq=5, do_ost_test=True, do_vf_test=False)
     do_group(SAMPLE_NUM, test_freq=5, do_ost_test=True, do_vf_test=True)
 
-def run_one_person():
-    h = Human(test_freq=5, do_ost_test=False, do_vf_test=False)
+def run_one_person(test_freq, do_ost_test, do_vf_test):
+    h = Human(test_freq=test_freq, do_ost_test=do_ost_test, do_vf_test=do_vf_test)
     h.do_life(prt=True)
 
 
 
 if __name__ == '__main__':
-    #run_one_person()
+    #run_one_person(5, True, True)
     run_groups()
 
 
