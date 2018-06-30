@@ -3,7 +3,8 @@ import random
 import numpy as np
 from collections import Counter
 
-
+DRUG_PERIOD = 5
+FX_LAST = 5
 
 PROB_TABLE = {}
 PROB_TABLE['no_ost_no_trt'] = {}
@@ -184,26 +185,6 @@ def natual_death_rate(age):
     else:
         return 0.0676953
 
-def fx_death_rate(fx, age):
-    #TODO: remove this
-    #return 0
-    if fx == 'vf':
-        if age < 80:
-            return 0.0335633
-        else:
-            return 0.0851230
-    elif fx == 'hip':
-        if age < 80:
-            return 0.0268606
-        else:
-            return 0.0851230
-    elif fx == 'wf':
-        if age < 80:
-            return 0.0045102
-        else:
-            return 0.031496
-    else:
-        raise Exception("unknown fx type")
 
 def drug_cost():
     #TODO: FIX me price
@@ -278,9 +259,10 @@ def get_utility(fx, age):
 
 class Human(object):
     __slots__ = ('test_freq', 'do_ost_test', 'do_vf_test',
-    'age', 'next_test_age', 'last_fx_age', 'utils', 'cost', 'ost', 'vfa','fx', 'trt', 'ost_test', 'vfa_test',
+    'age', 'next_test', 'utils', 'cost', 'ost', 'vfa','fx', 'trt', 'ost_test', 'vfa_test',
     'vf_cnt', 'hip_cnt', 'wf_cnt', 'trt_cnt',
-    'worst_fx'
+    'drug_end',
+    'last_hip', 'last_vf', 'last_wf', 'fx_rate'
 
     )
     def __init__(self, test_freq=None, do_ost_test=None, do_vf_test=None):
@@ -289,8 +271,7 @@ class Human(object):
         self.do_vf_test = do_vf_test
 
         self.age = 55
-        self.next_test_age = None
-        self.last_fx_age = 0
+        self.next_test = None
         self.utils = 0
         self.cost = 0
         self.vf_cnt = 0
@@ -307,26 +288,60 @@ class Human(object):
         self.trt = False
         self.ost_test = None
         self.vfa_test = None
-        self.worst_fx = 'no_fx'
+        self.fx_rate =  'none'
+        self.drug_end = 0
+        self.last_hip = 0
+        self.last_vf = 0
+        self.last_wf = 0
 
     def __str__(self):
         if self.fx != 'death':
-            return "age={:4},next_test_age={:5},last_fx_age={:4},utils={:8},cost={:8},ost={:6},vfa={:6},fx={:6},trt={:6},ost_test={:6},vfa_test={:6},hip_cnt={},vf_cnt={},wf_cnt={},trt_cnt={},worst_fx={}".format(
-                self.age, self.next_test_age, self.last_fx_age, self.utils, self.cost, str(self.ost), str(self.vfa), self.fx, str(self.trt), self.ost_test, self.vfa_test, self.hip_cnt, self.vf_cnt,self.wf_cnt,self.trt_cnt,self.worst_fx)
+            return "age={:4},next_test={:5}, drug_end={:6}, last_hip={:4}, last_vf={:4}, last_wf={:4}, utils={:8}, cost={:8},     ost={:6},      vfa={:6},  fx={:6},     trt={:6},  ost_test={:6}, vfa_test={:6}, hip_cnt={:6}, vf_cnt={:6}, wf_cnt={:6}, trt_cnt={:6}, fx_rate={:6}".format(
+                self.age, self.next_test, self.drug_end, self.last_hip, self.last_vf, self.last_wf, self.utils, self.cost, str(self.ost), str(self.vfa), self.fx, str(self.trt), self.ost_test, self.vfa_test, self.hip_cnt, self.vf_cnt, self.wf_cnt, self.trt_cnt, self.fx_rate)
         else:
-            return "age={:4},next_test_age={:5},last_fx_age={:4},utils={:8},cost={:8},ost={:6},vfa={:6},fx={:6}".format(self.age, self.next_test_age, self.last_fx_age, self.utils, self.cost, str(self.ost), str(self.vfa), self.fx)
+            return "age={:4},next_test={:5}, drug_end={:6}, last_hip={:4}, last_vf={:4}, last_wf={:4}, utils={:8}, cost={:8},     ost={:6},      vfa={:6},  fx={:6}".format(
+                self.age, self.next_test, self.drug_end, self.last_hip, self.last_vf, self.last_wf, self.utils, self.cost, str(self.ost), str(self.vfa), self.fx)
+
+
+
+    def fx_death_rate(self):
+        if self.last_vf + FX_LAST >= self.age:
+            if self.age < 80:
+                self.fx_rate = 'vf_70'
+                return 0.0335633
+            else:
+                self.fx_rate = 'vf_90'
+                return 0.0851230
+        elif self.last_hip + FX_LAST >= self.age:
+            if self.age < 80:
+                self.fx_rate = 'hip_70'
+                return 0.0268606
+            else:
+                self.fx_rate = 'hip_90'
+                return 0.0851230
+        elif self.last_wf + FX_LAST >= self.age:
+            if self.age < 80:
+                self.fx_rate = 'wf_70'
+                return 0.0045102
+            else:
+                self.fx_rate = 'vf_90'
+                return 0.031496
+        else:
+            self.fx_rate = 'none'
+            return 0
+
 
     def lab_test(self):
         # #TODO delete
         # print self.fx
 
         do_test = False
-        if self.next_test_age is None:
+        if self.next_test is None:
             do_test = True
-            self.next_test_age = self.age + self.test_freq
-        if self.age == self.next_test_age:
+            self.next_test = self.age + self.test_freq
+        if self.age == self.next_test:
             do_test = True
-            self.next_test_age = self.age + self.test_freq
+            self.next_test = self.age + self.test_freq
 
 
         # if there is fx, ost is test is always positive, and therefore get treatment
@@ -336,7 +351,7 @@ class Human(object):
         #     self.trt = True
 
         if do_test:
-            self.trt = False
+            trt = False
             self.ost_test = None
             self.vfa_test = None
             # if no fracture.
@@ -345,38 +360,42 @@ class Human(object):
                     #  if has ost, OST_SENSI chance positve test result.
                     if random.random() < OST_SENSI:
                         self.ost_test = 'Pos'
-                        self.trt = True
+                        trt = True
                     else:
                         self.ost_test = 'Neg'
-                        self.trt = False
+                        trt = False
                 else:
                     if random.random() > OST_SPEC:
                         self.ost_test = 'Pos'
-                        self.trt = True
+                        trt = True
                     else:
                         self.ost_test = 'Neg'
-                        self.trt = False
+                        trt = False
 
                 if self.do_vf_test and self.ost_test == 'Neg':
                     if self.vfa:
                         if random.random() < VFA_SENSI:
                             self.vfa_test = 'Pos'
-                            self.trt = True
+                            trt = True
                         else:
                             self.vfa_test = 'Neg'
-                            self.trt = False
+                            trt = False
                     else:
                         if random.random() > VFA_SPEC:
                             self.vfa_test = 'Pos'
-                            self.trt = True
+                            trt = True
                         else:
                             self.vfa_test = 'Neg'
-                            self.trt = False
+                            trt = False
+            if trt:
+                self.drug_end = max(self.drug_end, self.age + DRUG_PERIOD)
 
-            if self.trt is None:
-                raise Exception("trt cannot be None")
-            if self.do_ost_test and (self.ost_test is None):
-                raise Exception("everyone should have done OST TEST")
+        self.trt = self.age < self.drug_end
+
+        if self.trt is None:
+            raise Exception("trt cannot be None")
+        if self.do_ost_test and (self.ost_test is None):
+            raise Exception("everyone should have done OST TEST")
 
     def get_status_str(self):
         return to_status_str(self.ost, self.vfa, self.trt)
@@ -407,10 +426,7 @@ class Human(object):
     def state_transition(self, prt=False):
         ret = None
         natual_rate = natual_death_rate(self.age)
-        if self.fx == 'no_fx':
-            prob_death = 0
-        else:
-            prob_death = fx_death_rate(self.fx, self.age)
+        prob_death = self.fx_death_rate()
         old_fx = self.fx
         status_str = self.get_status_str()
         vector = PROB_TABLE[status_str][old_fx]
@@ -445,6 +461,12 @@ class Human(object):
             if self.fx not in ['no_fx', 'death']:
                 # TODO: extra nursing
                 self.cost += er_cost(self.fx, self.age) + 12000
+            if self.fx == 'hip':
+                self.last_hip = self.age
+            elif self.fx == 'vf':
+                self.last_vf = self.age
+            elif self.fx == 'wf':
+                self.last_wf = self.age
         self.age += 0.5
         return trans_prt
 
@@ -452,7 +474,7 @@ class Human(object):
         for i in xrange(89):
             cycle_prt=self.next_cycle(prt)
             if prt:
-                print "{:210s}, ____________   {}".format(self.__str__(), cycle_prt)
+                print "{:290s}, ____________   {}".format(self.__str__(), cycle_prt)
             if self.fx == 'death':
                 break
 
@@ -504,8 +526,9 @@ def do_group(sample_num, test_freq=None, do_ost_test=None, do_vf_test=None):
     print ""
     print "{:230s} {}".format(main_result, health_str)
     print counter_health
-    print counter_hip
-    print counter_vf
+    print 'hip cnt {}'.format(counter_hip)
+    print 'vf  cnt {}'.format(counter_vf)
+    print 'wf  cnt {}'.format(counter_wf)
     print ""
 
 
@@ -523,6 +546,7 @@ def run_one_person(test_freq, do_ost_test, do_vf_test):
 
 
 if __name__ == '__main__':
+    #run_one_person(5, False, False)
     #run_one_person(5, True, True)
     run_groups()
 
