@@ -5,6 +5,7 @@ from collections import Counter
 
 DRUG_PERIOD = 5
 FX_LAST = 5
+BASE_AGE = 55
 
 PROB_TABLE = {}
 PROB_TABLE['no_ost_no_trt'] = {}
@@ -262,7 +263,7 @@ class Human(object):
         self.do_ost_test = do_ost_test
         self.do_vf_test = do_vf_test
 
-        self.age = 55
+        self.age = BASE_AGE
         self.next_test = None
         self.utils = 0
         self.cost = 0
