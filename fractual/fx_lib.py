@@ -200,7 +200,7 @@ def natual_death_rate(age):
 
 def drug_cost():
     #TODO: FIX me price
-    return 60
+    return 150
 
 
 def ost_cost():
@@ -262,12 +262,12 @@ class Human(object):
     'discount'
 
     )
-    def __init__(self, test_freq=None, do_ost_test=None, do_vf_test=None):
+    def __init__(self, base_age=None, test_freq=None, do_ost_test=None, do_vf_test=None):
         self.test_freq = test_freq
         self.do_ost_test = do_ost_test
         self.do_vf_test = do_vf_test
 
-        self.age = BASE_AGE
+        self.age = base_age
         self.next_test = None
         self.acc_utils = 0
         self.acc_cost = 0
@@ -573,7 +573,8 @@ class Human(object):
 
 
 
-def do_group(sample_num, test_freq=None, do_ost_test=None, do_vf_test=None):
+def do_group(sample_num=None, base_age=None, test_freq=None, do_ost_test=None, do_vf_test=None):
+    print "sample_num={}, base_age={}, test_freq={}, do_ost_test={}, do_vf_test={}".format(sample_num, base_age, test_freq, do_ost_test, do_vf_test)
     counter_health = Counter()
     counter_hip = Counter()
     counter_vf = Counter()
@@ -586,7 +587,7 @@ def do_group(sample_num, test_freq=None, do_ost_test=None, do_vf_test=None):
     total_trt = 0
     total_age = 0
     for i in xrange(sample_num):
-        h = Human(test_freq=test_freq, do_ost_test=do_ost_test, do_vf_test=do_vf_test)
+        h = Human(base_age=base_age, test_freq=test_freq, do_ost_test=do_ost_test, do_vf_test=do_vf_test)
         h.do_life()
         total_cost += h.acc_cost
         total_utils += h.acc_utils
@@ -615,7 +616,7 @@ def do_group(sample_num, test_freq=None, do_ost_test=None, do_vf_test=None):
     ave_utils = total_utils/sample_num
     ave_age = total_age/sample_num
     health_str = "no_ost_no_vfa={:8d}, no_ost_vfa={:8d}, ost_no_vfa={:8d}, ost_vfa={:8d}".format(counter_health['no_ost_no_vfa'], counter_health['no_ost_vfa'], counter_health['ost_no_vfa'], counter_health['ost_vfa'])
-    main_result = "samples={}, test_freq={}, do_ost_test={:8s}, do_vf_test={:8s}, ave_cost={:12.2f}, ave_utils={:12.2f}, total_hip={:8}, total_vf={:8}, total_wf={:8}, total_trt={:8}, ave_age={:4}".format(sample_num, test_freq, str(do_ost_test), str(do_vf_test), ave_cost, ave_utils, total_hip, total_vf, total_wf, total_trt, ave_age)
+    main_result = "samples={}, test_freq={}, do_ost_test={:8s}, do_vf_test={:8s}, ave_cost={:14.4f}, ave_utils={:14.4f}, total_hip={:8}, total_vf={:8}, total_wf={:8}, total_trt={:8}, ave_age={:4}".format(sample_num, test_freq, str(do_ost_test), str(do_vf_test), ave_cost, ave_utils, total_hip, total_vf, total_wf, total_trt, ave_age)
     print ""
     print "{:230s} {}".format(main_result, health_str)
     print counter_health
@@ -632,8 +633,8 @@ def run_groups():
     do_group(SAMPLE_NUM, test_freq=5, do_ost_test=True, do_vf_test=False)
     do_group(SAMPLE_NUM, test_freq=5, do_ost_test=True, do_vf_test=True)
 
-def run_one_person(test_freq, do_ost_test, do_vf_test):
-    h = Human(test_freq=test_freq, do_ost_test=do_ost_test, do_vf_test=do_vf_test)
+def run_one_person(base_age=None, test_freq=None, do_ost_test=None, do_vf_test=None):
+    h = Human(base_age=base_age, test_freq=test_freq, do_ost_test=do_ost_test, do_vf_test=do_vf_test)
     h.do_life(prt=True)
 
 

@@ -602,7 +602,7 @@ def do_group(sample_num, test_freq=None, do_ost_test=None, do_vf_test=None):
 
 
 def run_groups():
-    SAMPLE_NUM = 1000*10
+    SAMPLE_NUM = 1000*490
     do_group(SAMPLE_NUM, test_freq=5, do_ost_test=False, do_vf_test=False)
     do_group(SAMPLE_NUM, test_freq=5, do_ost_test=True, do_vf_test=False)
     do_group(SAMPLE_NUM, test_freq=5, do_ost_test=True, do_vf_test=True)
@@ -614,9 +614,9 @@ def run_one_person(test_freq, do_ost_test, do_vf_test):
 
 
 if __name__ == '__main__':
-    run_one_person(5, False, False)
+    #run_one_person(5, False, False)
     #run_one_person(5, True, True)
-    #run_groups()
+    run_groups()
 
 
 
