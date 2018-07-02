@@ -2,142 +2,13 @@ import sys
 import random
 import numpy as np
 from collections import Counter
+from prob_table import PROB_TABLE
 
 DRUG_PERIOD = 5
 FX_LAST = 5
 BASE_AGE = 65
 DISCOUNT_RATE = 0.03
 DISCOUNT = 1-DISCOUNT_RATE/2
-
-PROB_TABLE = {}
-PROB_TABLE['no_ost_no_trt'] = {}
-PROB_TABLE['no_ost_no_trt']['no_fx'] = {}
-PROB_TABLE['no_ost_no_trt']['no_fx']['hip'] = 0.00070024
-PROB_TABLE['no_ost_no_trt']['no_fx']['vf']  = 0.00070024
-PROB_TABLE['no_ost_no_trt']['no_fx']['wf']  = 0.00006299
-PROB_TABLE['no_ost_no_trt']['hip'] = {}
-PROB_TABLE['no_ost_no_trt']['hip']['hip'] = 0.00786026
-PROB_TABLE['no_ost_no_trt']['hip']['vf']  = 0.00480247
-PROB_TABLE['no_ost_no_trt']['hip']['wf']  = 0.0025
-PROB_TABLE['no_ost_no_trt']['vf'] = {}
-PROB_TABLE['no_ost_no_trt']['vf']['hip'] = 0.00370072
-PROB_TABLE['no_ost_no_trt']['vf']['vf']  = 0.02480771
-PROB_TABLE['no_ost_no_trt']['vf']['wf']  = 0.00511307
-PROB_TABLE['no_ost_no_trt']['wf'] = {}
-PROB_TABLE['no_ost_no_trt']['wf']['hip'] = 0.00257979
-PROB_TABLE['no_ost_no_trt']['wf']['vf']  = 0.00220672
-PROB_TABLE['no_ost_no_trt']['wf']['wf']  = 0.00175901
-
-PROB_TABLE['has_ost_no_trt'] = {}
-PROB_TABLE['has_ost_no_trt']['no_fx'] = {}
-PROB_TABLE['has_ost_no_trt']['no_fx']['hip'] = 0.00277684
-PROB_TABLE['has_ost_no_trt']['no_fx']['vf']  = 0.00744093
-PROB_TABLE['has_ost_no_trt']['no_fx']['wf']  = 0.00599948
-PROB_TABLE['has_ost_no_trt']['hip'] = {}
-PROB_TABLE['has_ost_no_trt']['hip']['hip'] = 0.01786026
-PROB_TABLE['has_ost_no_trt']['hip']['vf']  = 0.00780247
-PROB_TABLE['has_ost_no_trt']['hip']['wf']  = 0.0055
-PROB_TABLE['has_ost_no_trt']['vf'] = {}
-PROB_TABLE['has_ost_no_trt']['vf']['hip'] = 0.00631997
-PROB_TABLE['has_ost_no_trt']['vf']['vf']  = 0.02672291
-PROB_TABLE['has_ost_no_trt']['vf']['wf']  = 0.00695305
-PROB_TABLE['has_ost_no_trt']['wf'] = {}
-PROB_TABLE['has_ost_no_trt']['wf']['hip'] = 0.00357979
-PROB_TABLE['has_ost_no_trt']['wf']['vf']  = 0.00320672
-PROB_TABLE['has_ost_no_trt']['wf']['wf']  = 0.00275901
-
-PROB_TABLE['has_ost_trt'] = {}
-PROB_TABLE['has_ost_trt']['no_fx'] = {}
-PROB_TABLE['has_ost_trt']['no_fx']['hip'] = 0.0012555
-PROB_TABLE['has_ost_trt']['no_fx']['vf']  = 0.00264944
-PROB_TABLE['has_ost_trt']['no_fx']['wf']  = 0.00534908
-PROB_TABLE['has_ost_trt']['hip'] = {}
-PROB_TABLE['has_ost_trt']['hip']['hip'] = 0.00520493
-PROB_TABLE['has_ost_trt']['hip']['vf']  = 0.00402953
-PROB_TABLE['has_ost_trt']['hip']['wf']  = 0.00292734
-PROB_TABLE['has_ost_trt']['vf'] = {}
-PROB_TABLE['has_ost_trt']['vf']['hip'] = 0.0018418
-PROB_TABLE['has_ost_trt']['vf']['vf']  = 0.01380084
-PROB_TABLE['has_ost_trt']['vf']['wf']  = 0.00370072
-PROB_TABLE['has_ost_trt']['wf'] = {}
-PROB_TABLE['has_ost_trt']['wf']['hip'] = 0.00104324
-PROB_TABLE['has_ost_trt']['wf']['vf']  = 0.00165609
-PROB_TABLE['has_ost_trt']['wf']['wf']  = 0.00146847
-
-PROB_TABLE['no_ost_trt'] = {}
-PROB_TABLE['no_ost_trt']['no_fx'] = {}
-PROB_TABLE['no_ost_trt']['no_fx']['hip'] = 0.000308106
-PROB_TABLE['no_ost_trt']['no_fx']['vf']  = 0.00039213
-PROB_TABLE['no_ost_trt']['no_fx']['wf']  = 0.00005543
-PROB_TABLE['no_ost_trt']['hip'] = {}
-PROB_TABLE['no_ost_trt']['hip']['hip'] = 0.00345851
-PROB_TABLE['no_ost_trt']['hip']['vf']  = 0.00268938
-PROB_TABLE['no_ost_trt']['hip']['wf']  = 0.0022
-PROB_TABLE['no_ost_trt']['vf'] = {}
-PROB_TABLE['no_ost_trt']['vf']['hip'] = 0.001628317
-PROB_TABLE['no_ost_trt']['vf']['vf']  = 0.013892318
-PROB_TABLE['no_ost_trt']['vf']['wf']  = 0.004499502
-PROB_TABLE['no_ost_trt']['wf'] = {}
-PROB_TABLE['no_ost_trt']['wf']['hip'] = 0.001135108
-PROB_TABLE['no_ost_trt']['wf']['vf']  = 0.001235763
-PROB_TABLE['no_ost_trt']['wf']['wf']  = 0.001547929
-
-PROB_TABLE['has_vfa_no_trt'] = {}
-PROB_TABLE['has_vfa_no_trt']['no_fx'] = {}
-PROB_TABLE['has_vfa_no_trt']['no_fx']['hip'] = 0.01453593
-PROB_TABLE['has_vfa_no_trt']['no_fx']['vf']  = 0.02672291
-PROB_TABLE['has_vfa_no_trt']['no_fx']['wf']  = 0.0111249
-PROB_TABLE['has_vfa_no_trt']['hip'] = {}
-PROB_TABLE['has_vfa_no_trt']['hip']['hip'] = 0.018078598
-PROB_TABLE['has_vfa_no_trt']['hip']['vf']  = 0.06051112
-PROB_TABLE['has_vfa_no_trt']['hip']['wf']  = 0.004
-PROB_TABLE['has_vfa_no_trt']['vf'] = {}
-PROB_TABLE['has_vfa_no_trt']['vf']['hip'] = 0.00631997
-PROB_TABLE['has_vfa_no_trt']['vf']['vf']  = 0.33670867
-PROB_TABLE['has_vfa_no_trt']['vf']['wf']  = 0.00695305
-PROB_TABLE['has_vfa_no_trt']['wf'] = {}
-PROB_TABLE['has_vfa_no_trt']['wf']['hip'] = 0.00593352
-PROB_TABLE['has_vfa_no_trt']['wf']['vf']  = 0.02780467
-PROB_TABLE['has_vfa_no_trt']['wf']['wf']  = 0.00281442
-
-PROB_TABLE['has_vfa_trt'] = {}
-PROB_TABLE['has_vfa_trt']['no_fx'] = {}
-PROB_TABLE['has_vfa_trt']['no_fx']['hip'] = 0.00639581
-PROB_TABLE['has_vfa_trt']['no_fx']['vf']  = 0.0138084
-PROB_TABLE['has_vfa_trt']['no_fx']['wf']  = 0.00978989
-PROB_TABLE['has_vfa_trt']['hip'] = {}
-PROB_TABLE['has_vfa_trt']['hip']['hip'] = 0.00795458
-PROB_TABLE['has_vfa_trt']['hip']['vf']  = 0.03388623
-PROB_TABLE['has_vfa_trt']['hip']['wf']  = 0.00352
-PROB_TABLE['has_vfa_trt']['vf'] = {}
-PROB_TABLE['has_vfa_trt']['vf']['hip'] = 0.0018418
-PROB_TABLE['has_vfa_trt']['vf']['vf']  = 0.18855685
-PROB_TABLE['has_vfa_trt']['vf']['wf']  = 0.00370072
-PROB_TABLE['has_vfa_trt']['wf'] = {}
-PROB_TABLE['has_vfa_trt']['wf']['hip'] = 0.00261075
-PROB_TABLE['has_vfa_trt']['wf']['vf']  = 0.01557062
-PROB_TABLE['has_vfa_trt']['wf']['wf']  = 0.00247669
-
-
-
-def to_status_str(ost, vfa, trt):
-    if (not ost) and (not vfa) and (not trt):
-        return 'no_ost_no_trt'
-    elif (not ost) and (not vfa) and trt:
-        return 'no_ost_trt'
-    elif (not ost) and vfa and (not trt):
-        return 'has_vfa_no_trt'
-    elif (not ost) and vfa and trt:
-        return 'has_vfa_trt'
-    elif ost and (not vfa) and (not trt):
-        return 'has_ost_no_trt'
-    elif ost and (not vfa) and trt:
-        return 'has_ost_trt'
-    elif ost and vfa and (not trt):
-        return 'has_vfa_no_trt'
-    elif ost and vfa and trt:
-        return 'has_vfa_trt'
-
 
 VFA_SENSI = 0.85
 VFA_SPEC = 0.92
@@ -164,6 +35,37 @@ OST_PREVAL[80] = 0.876
 OST_PREVAL_60 = (OST_PREVAL[60] - OST_PREVAL[55])/(1-OST_PREVAL[55])
 OST_PREVAL_70 = (OST_PREVAL[70] - OST_PREVAL[60])/(1-OST_PREVAL[60])
 OST_PREVAL_80 = (OST_PREVAL[80] - OST_PREVAL[70])/(1-OST_PREVAL[70])
+
+def to_status_str(ost, vfa, trt):
+    if (not ost) and (not vfa) and (not trt):
+        return 'no_ost_no_trt'
+    elif (not ost) and (not vfa) and trt:
+        return 'no_ost_trt'
+    elif (not ost) and vfa and (not trt):
+        return 'has_vfa_no_trt'
+    elif (not ost) and vfa and trt:
+        return 'has_vfa_trt'
+    elif ost and (not vfa) and (not trt):
+        return 'has_ost_no_trt'
+    elif ost and (not vfa) and trt:
+        return 'has_ost_trt'
+    elif ost and vfa and (not trt):
+        return 'has_vfa_no_trt'
+    elif ost and vfa and trt:
+        return 'has_vfa_trt'
+
+
+def ost_sensi(age):
+    if age < 65:
+        return 0.5
+    else:
+        return 0.73
+
+def ost_spec(age):
+    if age < 65:
+        return 0.93
+    else:
+        return 1
 
 
 def ost_preval(age):
@@ -375,18 +277,6 @@ class Human(object):
             else:
                 raise Exception("unknown fx")
 
-# VFA_PREVAL[50] = 0.017
-# VFA_PREVAL[60] = 0.0386
-# VFA_PREVAL[70] = 0.0647
-
-# OST_SENSI = 0.73
-# OST_SPEC = 1
-# OST_PREVAL = {}
-# OST_PREVAL[55] = 0.561
-# OST_PREVAL[60] = 0.657
-# OST_PREVAL[70] = 0.775
-# OST_PREVAL[80] = 0.876
-
     def add_new_ost_vfa(self):
         if self.age == 60:
             if not self.ost:
@@ -434,6 +324,7 @@ class Human(object):
                 if self.ost:
                     #  if has ost, OST_SENSI chance positve test result.
                     if random.random() < OST_SENSI:
+                    #if random.random() < ost_sensi(self.age):
                         self.ost_test = 'Pos'
                         trt = True
                     else:
@@ -441,6 +332,7 @@ class Human(object):
                         trt = False
                 else:
                     if random.random() > OST_SPEC:
+                        #if random.random() > ost_spec(self.age):
                         self.ost_test = 'Pos'
                         trt = True
                     else:
