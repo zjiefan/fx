@@ -5,7 +5,7 @@ from collections import Counter
 from prob_table import PROB_TABLE
 
 DRUG_PERIOD = 5
-FX_LAST = 5
+FX_DEATH_RATE_LAST = 1
 BASE_AGE = 65
 DISCOUNT_RATE = 0.03
 DISCOUNT = 1-DISCOUNT_RATE/2
@@ -215,21 +215,23 @@ class Human(object):
 
 
     def fx_death_rate(self):
-        if self.last_vf + FX_LAST >= self.age:
+        if self.last_vf + FX_DEATH_RATE_LAST >= self.age:
             if self.age < 80:
                 self.fx_rate = 'vf_70'
                 return 0.0335633
             else:
                 self.fx_rate = 'vf_90'
                 return 0.0851230
-        elif self.last_hip + FX_LAST >= self.age:
+        elif self.last_hip + FX_DEATH_RATE_LAST >= self.age:
             if self.age < 80:
                 self.fx_rate = 'hip_70'
-                return 0.0268606
+                return 0.1112
+                # return 0.0268606
             else:
                 self.fx_rate = 'hip_90'
-                return 0.0851230
-        elif self.last_wf + FX_LAST >= self.age:
+                return 0.2384
+                #return 0.0851230
+        elif self.last_wf + FX_DEATH_RATE_LAST >= self.age:
             if self.age < 80:
                 self.fx_rate = 'wf_70'
                 return 0.0045102
