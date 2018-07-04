@@ -9,6 +9,7 @@ FX_LAST = 5
 BASE_AGE = 65
 DISCOUNT_RATE = 0.03
 DISCOUNT = 1-DISCOUNT_RATE/2
+EFF_DELAY = 2
 
 VFA_SENSI = 0.85
 VFA_SPEC = 0.92
@@ -102,7 +103,7 @@ def natual_death_rate(age):
 
 def drug_cost():
     #TODO: FIX me price
-    return 150
+    return 300
 
 
 def ost_cost():
@@ -159,7 +160,7 @@ class Human(object):
     'vf_cnt', 'hip_cnt', 'wf_cnt', 'trt_cnt',
     'drug_end',
     'last_hip', 'last_vf', 'last_wf', 'fx_rate',
-    'trt_p1', 'trt_p2', 'old_fx',
+    'old_fx', 'trt_len', 'trt_eff',
     'inc_cost', 'inc_utils',
     'discount'
 
@@ -185,8 +186,8 @@ class Human(object):
             self.vfa = True
         self.fx = 'no_fx'
         self.trt = False
-        self.trt_p1 = False
-        self.trt_p2 = False
+        self.trt_len = 0
+        self.trt_eff = None
         self.old_fx = None
         self.ost_test = None
         self.vfa_test = None
@@ -206,8 +207,8 @@ class Human(object):
                 self.age, self.next_test, self.drug_end, self.last_hip, self.last_vf, self.last_wf, self.inc_utils, self.acc_utils, self.inc_cost, self.acc_cost, ost, vfa, self.fx)
 
         if self.fx != 'death':
-            return "{}   trt={:6},{:6},{:6},  ost_test={:6}, vfa_test={:6}, hip_cnt={:2}, vf_cnt={:2}, wf_cnt={:2}, trt_cnt={:4}, fx_rate={:6}".format(
-                header, str(self.trt),str(self.trt_p1),str(self.trt_p2), self.ost_test, self.vfa_test, self.hip_cnt, self.vf_cnt, self.wf_cnt, self.trt_cnt, self.fx_rate)
+            return "{}   trt={:6},len={:2},eff={:6},  ost_test={:6}, vfa_test={:6}, hip_cnt={:2}, vf_cnt={:2}, wf_cnt={:2}, trt_cnt={:4}, fx_rate={:6}".format(
+                header, str(self.trt),self.trt_len, str(self.trt_eff), self.ost_test, self.vfa_test, self.hip_cnt, self.vf_cnt, self.wf_cnt, self.trt_cnt, self.fx_rate)
         else:
             return header
 
@@ -298,8 +299,6 @@ class Human(object):
         # #TODO delete
         # print self.fx
 
-        self.trt_p2 = self.trt_p1
-        self.trt_p1 = self.trt
 
 
         do_test = False
@@ -358,6 +357,11 @@ class Human(object):
             self.drug_end = max(self.drug_end, self.age + DRUG_PERIOD)
 
         self.trt = self.age < self.drug_end
+        if self.trt:
+            self.trt_len += 1
+        else:
+            self.trt_len = 0
+
 
         # if self.trt is None:
         #     raise Exception("trt cannot be None")
@@ -365,11 +369,11 @@ class Human(object):
         #     raise Exception("everyone should have done OST TEST")
 
     def get_status_str(self):
-        if self.trt and self.trt_p1 and self.trt_p2:
-            trt = True
+        if self.trt_len > EFF_DELAY:
+            self.trt_eff = True
         else:
-            trt = False
-        return to_status_str(self.ost, self.vfa, trt)
+            self.trt_eff = False
+        return to_status_str(self.ost, self.vfa, self.trt_eff)
 
     def add_cost(self):
         if self.ost_test is not None:
@@ -505,7 +509,7 @@ def do_group(sample_num=None, base_age=None, test_freq=None, do_ost_test=None, d
 
 
     ave_cost = total_cost/sample_num
-    ave_utils = total_utils/sample_num
+    ave_utils = total_utils/sample_num/2
     ave_age = total_age/sample_num
     health_str = "no_ost_no_vfa={:8d}, no_ost_vfa={:8d}, ost_no_vfa={:8d}, ost_vfa={:8d}".format(counter_health['no_ost_no_vfa'], counter_health['no_ost_vfa'], counter_health['ost_no_vfa'], counter_health['ost_vfa'])
     main_result = "samples={}, test_freq={}, do_ost_test={:8s}, do_vf_test={:8s}, ave_cost={:14.4f}, ave_utils={:14.4f}, total_hip={:8}, total_vf={:8}, total_wf={:8}, total_trt={:8}, ave_age={:4}".format(sample_num, test_freq, str(do_ost_test), str(do_vf_test), ave_cost, ave_utils, total_hip, total_vf, total_wf, total_trt, ave_age)
@@ -535,9 +539,3 @@ if __name__ == '__main__':
     #run_one_person(5, False, False)
     #run_one_person(5, True, True)
     run_groups()
-
-
-
-
-
-
