@@ -5,6 +5,8 @@ from collections import Counter
 from prob_table import PROB_TABLE
 
 DRUG_PERIOD = 5
+DRUG_HOLIDAY = 5
+DRUG_PRICE = 600
 FX_DEATH_RATE_LAST = 1
 BASE_AGE = 65
 DISCOUNT_RATE = 0.03
@@ -13,29 +15,9 @@ EFF_DELAY = 2
 
 VFA_SENSI = 0.85
 VFA_SPEC = 0.92
-VFA_PREVAL = {}
-#TODO:
-#VFA_PREVAL[50] = 0.017
-VFA_PREVAL[50] = 0.017
-VFA_PREVAL[60] = 0.0386
-VFA_PREVAL[70] = 0.0647
-
-
-VFA_PREVAL_60 = (VFA_PREVAL[60] - VFA_PREVAL[50])/(1-VFA_PREVAL[50])
-VFA_PREVAL_70 = (VFA_PREVAL[70] - VFA_PREVAL[60])/(1-VFA_PREVAL[60])
-
 
 OST_SENSI = 0.73
 OST_SPEC = 1
-OST_PREVAL = {}
-OST_PREVAL[55] = 0.561
-OST_PREVAL[60] = 0.657
-OST_PREVAL[70] = 0.775
-OST_PREVAL[80] = 0.876
-
-OST_PREVAL_60 = (OST_PREVAL[60] - OST_PREVAL[55])/(1-OST_PREVAL[55])
-OST_PREVAL_70 = (OST_PREVAL[70] - OST_PREVAL[60])/(1-OST_PREVAL[60])
-OST_PREVAL_80 = (OST_PREVAL[80] - OST_PREVAL[70])/(1-OST_PREVAL[70])
 
 def to_status_str(ost, vfa, trt):
     if (not ost) and (not vfa) and (not trt):
@@ -69,15 +51,6 @@ def ost_spec(age):
         return 1
 
 
-def ost_preval(age):
-    if age < 60:
-        return OST_PREVAL[55]
-    elif age < 70:
-        return OST_PREVAL[60]
-    elif age < 80:
-        return OST_PREVAL[70]
-    else:
-        return OST_PREVAL[80]
 
 def vfa_preval(age):
     return VFA_PREVAL[50]
@@ -103,7 +76,7 @@ def natual_death_rate(age):
 
 def drug_cost():
     #TODO: FIX me price
-    return 300
+    return 1.0*DRUG_PRICE/2
 
 
 def ost_cost():
@@ -158,7 +131,7 @@ class Human(object):
     __slots__ = ('test_freq', 'do_ost_test', 'do_vf_test',
     'age', 'next_test', 'acc_utils', 'acc_cost', 'ost', 'vfa','fx', 'trt', 'ost_test', 'vfa_test',
     'vf_cnt', 'hip_cnt', 'wf_cnt', 'trt_cnt',
-    'drug_end',
+    'drug_end', 'drug_holiday_end',
     'last_hip', 'last_vf', 'last_wf', 'fx_rate',
     'old_fx', 'trt_len', 'trt_eff',
     'inc_cost', 'inc_utils',
@@ -180,10 +153,8 @@ class Human(object):
         self.trt_cnt = 0
         self.ost = False
         self.vfa = False
-        if random.random() < ost_preval(self.age):
-            self.ost = True
-        if random.random() < vfa_preval(self.age):
-            self.vfa = True
+        self.ost = set_ost(self.age, self.ost):
+        self.vfa = set_vfa(self.age, self.vfa):
         self.fx = 'no_fx'
         self.trt = False
         self.trt_len = 0
@@ -193,6 +164,7 @@ class Human(object):
         self.vfa_test = None
         self.fx_rate =  'none'
         self.drug_end = 0
+        self.drug_holiday_end = 0
         self.last_hip = 0
         self.last_vf = 0
         self.last_wf = 0
@@ -207,8 +179,8 @@ class Human(object):
                 self.age, self.next_test, self.drug_end, self.last_hip, self.last_vf, self.last_wf, self.inc_utils, self.acc_utils, self.inc_cost, self.acc_cost, ost, vfa, self.fx)
 
         if self.fx != 'death':
-            return "{}   trt={:6},len={:2},eff={:6},  ost_test={:6}, vfa_test={:6}, hip_cnt={:2}, vf_cnt={:2}, wf_cnt={:2}, trt_cnt={:4}, fx_rate={:6}".format(
-                header, str(self.trt),self.trt_len, str(self.trt_eff), self.ost_test, self.vfa_test, self.hip_cnt, self.vf_cnt, self.wf_cnt, self.trt_cnt, self.fx_rate)
+            return "{}   trt={:6},len={:2},eff={:6}, holiday_end={:5} ost_test={:6}, vfa_test={:6}, hip_cnt={:2}, vf_cnt={:2}, wf_cnt={:2}, trt_cnt={:4}, fx_rate={:6}".format(
+                header, str(self.trt),self.trt_len, str(self.trt_eff), self.drug_holiday_end, self.ost_test, self.vfa_test, self.hip_cnt, self.vf_cnt, self.wf_cnt, self.trt_cnt, self.fx_rate)
         else:
             return header
 
@@ -280,26 +252,30 @@ class Human(object):
             else:
                 raise Exception("unknown fx")
 
-    def add_new_ost_vfa(self):
-        if self.age == 60:
-            if not self.ost:
-                self.ost = random.random() < OST_PREVAL_60
-            if not self.vfa:
-                self.vfa = random.random() < VFA_PREVAL_60
-        elif self.age == 70:
-            if not self.ost:
-                self.ost = random.random() < OST_PREVAL_70
-            if not self.vfa:
-                self.vfa = random.random() < VFA_PREVAL_70
-        elif self.age == 80:
-            if not self.ost:
-                self.ost = random.random() < OST_PREVAL_80
 
 
 
-    def lab_test(self):
+    def ost_result(self):
+        if self.ost:
+            #  if has ost, OST_SENSI chance positve test result.
+            if random.random() < OST_SENSI:
+            #if random.random() < ost_sensi(self.age):
+                return True
+            else:
+                return False
+        else:
+            if random.random() > OST_SPEC:
+                #if random.random() > ost_spec(self.age):
+                trt = True
+            else:
+                trt = False
+
+
+    def lab_test(self, strategy):
         # #TODO delete
         # print self.fx
+
+
 
 
 
@@ -322,23 +298,6 @@ class Human(object):
         if do_test:
             # if no fracture.
             if self.do_ost_test:
-                if self.ost:
-                    #  if has ost, OST_SENSI chance positve test result.
-                    if random.random() < OST_SENSI:
-                    #if random.random() < ost_sensi(self.age):
-                        self.ost_test = 'Pos'
-                        trt = True
-                    else:
-                        self.ost_test = 'Neg'
-                        trt = False
-                else:
-                    if random.random() > OST_SPEC:
-                        #if random.random() > ost_spec(self.age):
-                        self.ost_test = 'Pos'
-                        trt = True
-                    else:
-                        self.ost_test = 'Neg'
-                        trt = False
 
                 if self.do_vf_test and self.ost_test == 'Neg':
                     if self.vfa:
@@ -355,13 +314,22 @@ class Human(object):
                         else:
                             self.vfa_test = 'Neg'
                             trt = False
-        if trt:
-            self.drug_end = max(self.drug_end, self.age + DRUG_PERIOD)
+        #TODO: with drug holiday
+        # if trt:
+        #     self.drug_end = max(self.drug_end, self.age + DRUG_PERIOD)
+        if self.age > self.drug_holiday_end:
+            if trt:
+                self.drug_end = self.age + DRUG_PERIOD
+                self.drug_holiday_end = self.age + DRUG_PERIOD + DRUG_HOLIDAY
+
 
         self.trt = self.age < self.drug_end
         if self.trt:
             self.trt_len += 1
-        else:
+        # TODO: effect until drug_holiday_end
+        # else:
+        #     self.trt_len = 0
+        if self.age >= self.drug_holiday_end:
             self.trt_len = 0
 
 
@@ -532,6 +500,7 @@ def run_groups():
     do_group(SAMPLE_NUM, test_freq=5, do_ost_test=True, do_vf_test=True)
 
 def run_one_person(base_age=None, test_freq=None, do_ost_test=None, do_vf_test=None):
+    print "base_age={}, test_freq={}, do_ost_test={}, do_vf_test={}".format(base_age, test_freq, do_ost_test, do_vf_test)
     h = Human(base_age=base_age, test_freq=test_freq, do_ost_test=do_ost_test, do_vf_test=do_vf_test)
     h.do_life(prt=True)
 
