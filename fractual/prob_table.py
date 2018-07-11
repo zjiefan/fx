@@ -205,98 +205,91 @@ OST_PREVAL_60 = (OST_PREVAL[60] - OST_PREVAL[55])/(1-OST_PREVAL[55])
 OST_PREVAL_70 = (OST_PREVAL[70] - OST_PREVAL[60])/(1-OST_PREVAL[60])
 OST_PREVAL_80 = (OST_PREVAL[80] - OST_PREVAL[70])/(1-OST_PREVAL[70])
 
-OST_SICK_PREVAL_55 = 0.068
-OST_SICK_PREVAL_60 = 0.123
-OST_SICK_PREVAL_70 = 0.257
-OST_SICK_PREVAL_80 = 0.349
+OST_SICK_PREVAL = {}
+OST_SICK_PREVAL[55] = 0.068
+OST_SICK_PREVAL[60] = 0.123
+OST_SICK_PREVAL[70] = 0.257
+OST_SICK_PREVAL[80] = 0.349
+
+OST_LBM_PREVAL = {}
+OST_LBM_PREVAL[55] = 0.493
+OST_LBM_PREVAL[60] = 0.534
+OST_LBM_PREVAL[70] = 0.518
+OST_LBM_PREVAL[80] = 0.527
+OST_SICK_NEW = {}
+OST_SICK_NEW[60] = (OST_SICK_PREVAL[60] - OST_SICK_PREVAL[55])/OST_LBM_PREVAL[55]
+OST_SICK_NEW[70] = (OST_SICK_PREVAL[70] - OST_SICK_PREVAL[60])/OST_LBM_PREVAL[60]
+OST_SICK_NEW[80] = (OST_SICK_PREVAL[80] - OST_SICK_PREVAL[70])/OST_LBM_PREVAL[70]
+
+OST_NORMAL_PREVAL = {}
+OST_NORMAL_PREVAL[55] = 1 - OST_LBM_PREVAL[55] - OST_SICK_PREVAL[55]
+OST_NORMAL_PREVAL[60] = 1 - OST_LBM_PREVAL[60] - OST_SICK_PREVAL[60]
+OST_NORMAL_PREVAL[70] = 1 - OST_LBM_PREVAL[70] - OST_SICK_PREVAL[70]
+OST_NORMAL_PREVAL[80] = 1 - OST_LBM_PREVAL[80] - OST_SICK_PREVAL[80]
+OST_LBM_NEW = {}
+OST_LBM_NEW[60] = (OST_SICK_PREVAL[60] - OST_SICK_PREVAL[55] + OST_LBM_PREVAL[60] - OST_LBM_PREVAL[55])/OST_NORMAL_PREVAL[55]
+OST_LBM_NEW[70] = (OST_SICK_PREVAL[70] - OST_SICK_PREVAL[60] + OST_LBM_PREVAL[70] - OST_LBM_PREVAL[60])/OST_NORMAL_PREVAL[60]
+OST_LBM_NEW[80] = (OST_SICK_PREVAL[80] - OST_SICK_PREVAL[70] + OST_LBM_PREVAL[80] - OST_LBM_PREVAL[70])/OST_NORMAL_PREVAL[70]
+if OST_LBM_NEW[60] < 0 or OST_LBM_NEW[60] >1:
+    raise Exception("OST_LBM_NEW_60 out of range")
+if OST_LBM_NEW[70] < 0 or OST_LBM_NEW[70] >1:
+    raise Exception("OST_LBM_NEW_70 out of range")
+if OST_LBM_NEW[80] < 0 or OST_LBM_NEW[80] >1:
+    raise Exception("OST_LBM_NEW_80 out of range")
+
+VFA_OST_NORMAL = 0.085
+VFA_OST_LBM = 0.157
+VFA_OST_SICK = 0.343
+VFA_LBM_TO_SICK = (VFA_OST_SICK - VFA_OST_LBM)/(1-VFA_OST_LBM)
+VFA_NORMAL_TO_LBM = (VFA_OST_LBM - VFA_OST_NORMAL)/(1-VFA_OST_NORMAL)
 
 
-OST_LBM_PREVAL_55 = 0.493
-OST_LBM_PREVAL_60 = 0.534
-OST_LBM_PREVAL_70 = 0.518
-OST_LBM_PREVAL_80 = 0.527
-OST_SICK_NEW_60 = (OST_SICK_PREVAL_60 - OST_SICK_PREVAL_55)/OST_LBM_PREVAL_55
-OST_SICK_NEW_70 = (OST_SICK_PREVAL_70 - OST_SICK_PREVAL_60)/OST_LBM_PREVAL_60
-OST_SICK_NEW_80 = (OST_SICK_PREVAL_80 - OST_SICK_PREVAL_70)/OST_LBM_PREVAL_70
-
-OST_NORMAL_PREVAL_55 = 1 - OST_LBM_PREVAL_55 - OST_SICK_PREVAL_55
-OST_NORMAL_PREVAL_60 = 1 - OST_LBM_PREVAL_60 - OST_SICK_PREVAL_60
-OST_NORMAL_PREVAL_70 = 1 - OST_LBM_PREVAL_70 - OST_SICK_PREVAL_70
-OST_NORMAL_PREVAL_80 = 1 - OST_LBM_PREVAL_80 - OST_SICK_PREVAL_80
-OST_LBM_NEW_60 = (OST_SICK_PREVAL_60 - OST_SICK_PREVAL_55 + OST_LBM_PREVAL_60 - OST_LBM_PREVAL_55)/OST_NORMAL_PREVAL_55
-OST_LBM_NEW_70 = (OST_SICK_PREVAL_70 - OST_SICK_PREVAL_60 + OST_LBM_PREVAL_70 - OST_LBM_PREVAL_60)/OST_NORMAL_PREVAL_60
-OST_LBM_NEW_80 = (OST_SICK_PREVAL_80 - OST_SICK_PREVAL_70 + OST_LBM_PREVAL_80 - OST_LBM_PREVAL_70)/OST_NORMAL_PREVAL_70
-
-
-
-def set_ost(age, cur_ost):
+def set_ost_vfa(age, cur_ost, cur_vfa):
     p = random.random()
+    pv = random.random()
     if cur_ost is None:
         if age < 60:
-            if p < OST_SICK_PREVAL_55:
-                return 'sick'
-            elif p < OST_SICK_PREVAL_55 + OST_LBM_PREVAL_55:
-                return 'lbm'
-            else:
-                return 'normal'
+            band = 55
         elif age < 70:
-            if p < OST_SICK_PREVAL_60:
-                return 'sick'
-            elif p < OST_SICK_PREVAL_60 + OST_LBM_PREVAL_60:
-                return 'lbm'
-            else:
-                return 'normal'
+            band = 60
         elif age < 80:
-            if p < OST_SICK_PREVAL_70:
-                return 'sick'
-            elif p < OST_SICK_PREVAL_70 + OST_LBM_PREVAL_70:
-                return 'lbm'
-            else:
-                return 'normal'
+            band = 70
         else:
-            if p < OST_SICK_PREVAL_80:
-                return 'sick'
-            elif p < OST_SICK_PREVAL_80 + OST_LBM_PREVAL_80:
-                return 'lbm'
-            else:
-                return 'normal'
+            band = 80
+        if p < OST_SICK_PREVAL[band]:
+            vfa = pv < VFA_OST_SICK
+            return 'sick', vfa
+        elif p < OST_SICK_PREVAL[band] + OST_LBM_PREVAL[band]:
+            vfa = pv < VFA_OST_LBM
+            return 'lbm', vfa
+        else:
+            vfa = pv < VFA_OST_NORMAL
+            return 'normal', vfa
     else:
-        if age == 60:
+        if age in [60, 70, 80]:
             if cur_ost == 'sick':
-                return 'sick'
+                return cur_ost, cur_vfa
             elif cur_ost == 'lbm':
-                if p < OST_SICK_NEW_60:
-                    return 'sick'
+                if p < OST_SICK_NEW[age]:
+                    if cur_vfa:
+                        vfa = True
+                    elif pv < VFA_LBM_TO_SICK:
+                        vfa = True
+                    else:
+                        vfa = False
+                    return 'sick', vfa
                 else:
-                    return 'lbm'
+                    return cur_ost, cur_vfa
             else:
-                if p < OST_LBM_NEW_60:
-                    return 'lbm'
+                if p < OST_LBM_NEW[age]:
+                    if cur_vfa:
+                        vfa = True
+                    elif pv < VFA_NORMAL_TO_LBM:
+                        vfa = True
+                    else:
+                        vfa = False
+                    return 'lbm', vfa
                 else:
-                    return 'normal'
-        elif p.age == 70:
-            if cur_ost == 'sick':
-                return 'sick'
-            elif cur_ost == 'lbm':
-                if p < OST_SICK_NEW_70:
-                    return 'sick'
-                else:
-                    return 'lbm'
-            else:
-                if p < OST_LBM_NEW_70:
-                    return 'lbm'
-                else:
-                    return 'normal'
-        elif p.age == 80:
-            if cur_ost == 'sick':
-                return 'sick'
-            elif cur_ost == 'lbm':
-                if p < OST_SICK_NEW_80:
-                    return 'sick'
-                else:
-                    return 'lbm'
-            else:
-                if p < OST_LBM_NEW_80:
-                    return 'lbm'
-                else:
-                    return 'normal'
+                    return cur_ost, cur_vfa
+
+
