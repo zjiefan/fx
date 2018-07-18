@@ -2,7 +2,7 @@ import sys
 import random
 import numpy as np
 from collections import Counter
-from prob_table import PROB_TABLE
+from prob_table import PROB_TABLE, set_ost_vfa, natual_death_rate
 
 DRUG_PERIOD = 5
 DRUG_HOLIDAY = 5
@@ -52,26 +52,7 @@ def ost_spec(age):
 
 
 
-def vfa_preval(age):
-    return VFA_PREVAL[50]
 
-def natual_death_rate(age):
-    #TODO: remove this
-    #return 0
-    if age < 60:
-        return 0.0027879
-    elif age < 65:
-        return 0.0039132
-    elif age < 70:
-        return 0.0057923
-    elif age < 75:
-        return 0.0093225
-    elif age < 80:
-        return 0.0152604
-    elif age < 85:
-        return 0.0264878
-    else:
-        return 0.0676953
 
 
 def drug_cost():
@@ -153,8 +134,7 @@ class Human(object):
         self.trt_cnt = 0
         self.ost = False
         self.vfa = False
-        self.ost = set_ost(self.age, self.ost):
-        self.vfa = set_vfa(self.age, self.vfa):
+        self.ost, self.vfa = set_ost_vfa(self.age, self.ost, self.vfa)
         self.fx = 'no_fx'
         self.trt = False
         self.trt_len = 0
@@ -271,7 +251,29 @@ class Human(object):
                 trt = False
 
 
-    def lab_test(self, strategy):
+    def strategy1_no_screening(self):
+        return False
+
+
+    def lab_test_strategy(self, strategy):
+        if self.fx != 'no_fx':
+            trt = True
+        self.ost_test = None
+        self.vfa_test = None
+        if
+
+        if trt:
+            self.drug_end = max(self.drug_end, self.age + DRUG_PERIOD)
+
+        self.trt = self.age < self.drug_end
+        if self.trt:
+            self.trt_len += 1
+        else:
+            self.trt_len = 0
+
+
+
+    def lab_test(self):
         # #TODO delete
         # print self.fx
 
@@ -407,7 +409,7 @@ class Human(object):
         if self.fx!='death':
             self.inc_cost = 0
             self.inc_utils = 0
-            self.add_new_ost_vfa()
+            self.ost, self.vfa = set_ost_vfa(self.age, self.ost, self.vfa)
             self.lab_test()
             self.add_cost()
             self.add_utils()
