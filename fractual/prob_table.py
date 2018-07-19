@@ -221,6 +221,26 @@ OST_SICK_NEW[60] = (OST_SICK_PREVAL[60] - OST_SICK_PREVAL[55])/OST_LBM_PREVAL[55
 OST_SICK_NEW[70] = (OST_SICK_PREVAL[70] - OST_SICK_PREVAL[60])/OST_LBM_PREVAL[60]
 OST_SICK_NEW[80] = (OST_SICK_PREVAL[80] - OST_SICK_PREVAL[70])/OST_LBM_PREVAL[70]
 
+OST_LBM1_PREVAL = {}
+#OST_LBM1_PREVAL[55] = 0.493
+OST_LBM1_PREVAL[60] = 0.454
+OST_LBM1_PREVAL[70] = 0.440
+OST_LBM1_PREVAL[80] = 0.448
+OST_SICK_NEW = {}
+OST_SICK_NEW[60] = (OST_SICK_PREVAL[60] - OST_SICK_PREVAL[55])/OST_LBM_PREVAL[55]
+OST_SICK_NEW[70] = (OST_SICK_PREVAL[70] - OST_SICK_PREVAL[60])/OST_LBM_PREVAL[60]
+OST_SICK_NEW[80] = (OST_SICK_PREVAL[80] - OST_SICK_PREVAL[70])/OST_LBM_PREVAL[70]
+
+OST_LBM2_PREVAL = {}
+#OST_LBM2_PREVAL[55] = 0.493
+OST_LBM2_PREVAL[60] = 0.534
+OST_LBM2_PREVAL[70] = 0.518
+OST_LBM2_PREVAL[80] = 0.527
+OST_SICK_NEW = {}
+OST_SICK_NEW[60] = (OST_SICK_PREVAL[60] - OST_SICK_PREVAL[55])/OST_LBM_PREVAL[55]
+OST_SICK_NEW[70] = (OST_SICK_PREVAL[70] - OST_SICK_PREVAL[60])/OST_LBM_PREVAL[60]
+OST_SICK_NEW[80] = (OST_SICK_PREVAL[80] - OST_SICK_PREVAL[70])/OST_LBM_PREVAL[70]
+
 OST_NORMAL_PREVAL = {}
 OST_NORMAL_PREVAL[55] = 1 - OST_LBM_PREVAL[55] - OST_SICK_PREVAL[55]
 OST_NORMAL_PREVAL[60] = 1 - OST_LBM_PREVAL[60] - OST_SICK_PREVAL[60]
@@ -291,6 +311,7 @@ def set_ost_vfa(age, cur_ost, cur_vfa):
                     return 'lbm', vfa
                 else:
                     return cur_ost, cur_vfa
+    raise Exception("function error")
 
 def natual_death_rate(age):
     #TODO: remove this
@@ -310,78 +331,63 @@ def natual_death_rate(age):
     else:
         return 0.0676953
 
-OST_DIST = {}
-OST_DIST['sick']   = [3, 9, 15, 73]
-OST_DIST['lbm2']   = [5, 10, 75, 10]
-OST_DIST['lbm1']   = [10,75, 10, 5]
-OST_DIST['normal'] = [100,0, 0, 0]
+OST_DIST = []
+for _ in xrange(3):
+    OST_DIST.append({})
+OST_DIST[1]['sick']   = [5,  20, 75]
+OST_DIST[1]['lbm']    = [15, 70, 15]
+OST_DIST[1]['normal'] = [100, 0,  0]
+
+OST_DIST[2]['sick']   = [5,  25, 70]
+OST_DIST[2]['lbm']    = [15, 75, 10]
+OST_DIST[2]['normal'] = [100, 0,  0]
 
 
-NORMALIZED_OST_DIST = {}
-TOTAL = sum(OST_DIST['sick'])*1.0
-NORMALIZED_OST_DIST['sick'] = (OST_DIST['sick'][0]/TOTAL, OST_DIST['sick'][1]/TOTAL, OST_DIST['sick'][2]/TOTAL, OST_DIST['sick'][3]/TOTAL)
-TOTAL = sum(OST_DIST['lbm2'])*1.0
-NORMALIZED_OST_DIST['lbm2'] = (OST_DIST['lbm2'][0]/TOTAL, OST_DIST['lbm2'][1]/TOTAL, OST_DIST['lbm2'][2]/TOTAL, OST_DIST['lbm2'][3]/TOTAL)
-TOTAL = sum(OST_DIST['lbm1'])*1.0
-NORMALIZED_OST_DIST['lbm1'] = (OST_DIST['lbm1'][0]/TOTAL, OST_DIST['lbm1'][1]/TOTAL, OST_DIST['lbm1'][2]/TOTAL, OST_DIST['lbm1'][3]/TOTAL)
-TOTAL = sum(OST_DIST['normal'])*1.0
-NORMALIZED_OST_DIST['normal'] = (OST_DIST['normal'][0]/TOTAL, OST_DIST['normal'][1]/TOTAL, OST_DIST['normal'][2]/TOTAL, OST_DIST['normal'][3]/TOTAL)
+NORMALIZED_OST_DIST = [None]*3
+NORMALIZED_OST_DIST[1] = {}
+NORMALIZED_OST_DIST[2] = {}
 
-def get_ost_test_result(ost):
+for i in range(1,3):
+    TOTAL = sum(OST_DIST[i]['sick'])*1.0
+    NORMALIZED_OST_DIST[i]['sick'] = (OST_DIST[i]['sick'][0]/TOTAL, OST_DIST[i]['sick'][1]/TOTAL, OST_DIST[i]['sick'][2]/TOTAL)
+    TOTAL = sum(OST_DIST[i]['lbm'])*1.0
+    NORMALIZED_OST_DIST[i]['lbm'] = (OST_DIST[i]['lbm'][0]/TOTAL, OST_DIST[i]['lbm'][1]/TOTAL, OST_DIST[i]['lbm'][2]/TOTAL)
+    TOTAL = sum(OST_DIST[i]['normal'])*1.0
+    NORMALIZED_OST_DIST[i]['normal'] = (OST_DIST[i]['normal'][0]/TOTAL, OST_DIST[i]['normal'][1]/TOTAL, OST_DIST[i]['normal'][2]/TOTAL)
+
+
+def get_ost_test_result(ost, threshold):
     p = random.random()
     if ost == 'sick':
-        p -= NORMALIZED_OST_DIST['sick'][0]
+        p -= NORMALIZED_OST_DIST[threshold]['sick'][0]
         if p <= 0:
             return 'normal'
-        p -= NORMALIZED_OST_DIST['sick'][1]
+        p -= NORMALIZED_OST_DIST[threshold]['sick'][1]
         if p <= 0:
-            return 'lbm1'
-        p -= NORMALIZED_OST_DIST['sick'][2]
-        if p <= 0:
-            return 'lbm2'
-        p -= NORMALIZED_OST_DIST['sick'][3]
+            return 'lbm'
+        p -= NORMALIZED_OST_DIST[threshold]['sick'][2]
         if p <= 0:
             return 'sick'
         raise Exception("bad probability")
-    elif ost == 'lbm2':
-        p -= NORMALIZED_OST_DIST['lbm2'][0]
+    elif ost == 'lbm':
+        p -= NORMALIZED_OST_DIST[threshold]['lbm'][0]
         if p < 0:
             return 'normal'
-        p -= NORMALIZED_OST_DIST['lbm2'][1]
+        p -= NORMALIZED_OST_DIST[threshold]['lbm'][1]
         if p < 0:
-            return 'lbm1'
-        p -= NORMALIZED_OST_DIST['lbm2'][2]
-        if p < 0:
-            return 'lbm2'
-        p -= NORMALIZED_OST_DIST['lbm2'][3]
-        if p <= 0:
-            return 'sick'
-        raise Exception("bad probability")
-    if ost == 'lbm1':
-        p -= NORMALIZED_OST_DIST['lbm1'][0]
-        if p < 0:
-            return 'normal'
-        p -= NORMALIZED_OST_DIST['lbm1'][1]
-        if p < 0:
-            return 'lbm1'
-        p -= NORMALIZED_OST_DIST['lbm1'][2]
-        if p < 0:
-            return 'lbm2'
-        p -= NORMALIZED_OST_DIST['lbm1'][3]
+            return 'lbm'
+        p -= NORMALIZED_OST_DIST[threshold]['lbm'][2]
         if p <= 0:
             return 'sick'
         raise Exception("bad probability")
     if ost == 'normal':
-        p -= NORMALIZED_OST_DIST['normal'][0]
+        p -= NORMALIZED_OST_DIST[threshold]['normal'][0]
         if p < 0:
             return 'normal'
-        p -= NORMALIZED_OST_DIST['normal'][1]
+        p -= NORMALIZED_OST_DIST[threshold]['normal'][1]
         if p < 0:
-            return 'lbm1'
-        p -= NORMALIZED_OST_DIST['normal'][2]
-        if p < 0:
-            return 'lbm2'
-        p -= NORMALIZED_OST_DIST['normal'][3]
+            return 'lbm'
+        p -= NORMALIZED_OST_DIST[threshold]['normal'][2]
         if p <= 0:
             return 'sick'
         raise Exception("bad probability")
@@ -389,24 +395,33 @@ def get_ost_test_result(ost):
 
 
 
+
 if __name__ == '__main__':
     from collections import Counter
-    c = Counter()
+    c = {}
+    c[('sick', 1)] = Counter()
     for _ in range(100000):
-        c[get_ost_test_result('sick')] += 1
-    print c
-    c = Counter()
+        c[('sick', 1)][get_ost_test_result('sick', 1)] += 1
+    c[('lbm', 1)] = Counter()
     for _ in range(100000):
-        c[get_ost_test_result('lbm2')] += 1
-    print c
-    c = Counter()
+        c[('lbm', 1)][get_ost_test_result('lbm', 1)] += 1
+    c[('normal', 1)] = Counter()
     for _ in range(100000):
-        c[get_ost_test_result('lbm1')] += 1
-    print c
-    c = Counter()
+        c[('normal', 1)][get_ost_test_result('normal', 1)] += 1
+
+    c[('sick', 2)] = Counter()
     for _ in range(100000):
-        c[get_ost_test_result('normal')] += 1
-    print c
+        c[('sick', 2)][get_ost_test_result('sick', 2)] += 1
+    c[('lbm', 2)] = Counter()
+    for _ in range(100000):
+        c[('lbm', 2)][get_ost_test_result('lbm', 2)] += 1
+    c[('normal', 2)] = Counter()
+    for _ in range(100000):
+        c[('normal', 2)][get_ost_test_result('normal', 2)] += 1
+
+    print NORMALIZED_OST_DIST
+    for k,v in c.iteritems():
+        print k, v
 
 
 

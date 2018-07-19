@@ -119,7 +119,7 @@ class Human(object):
     'discount'
 
     )
-    def __init__(self, base_age=None, test_freq=None, strategy=None):
+    def __init__(self, base_age=None, test_freq=5, strategy=None):
         self.test_freq = test_freq
         self.strategy = strategy
 
@@ -131,8 +131,8 @@ class Human(object):
         self.hip_cnt = 0
         self.wf_cnt = 0
         self.trt_cnt = 0
-        self.ost = False
-        self.vfa = False
+        self.ost = None
+        self.vfa = None
         self.ost, self.vfa = set_ost_vfa(self.age, self.ost, self.vfa)
         self.fx = 'no_fx'
         self.trt = False
@@ -258,7 +258,7 @@ class Human(object):
         return False
     def strategy2(self):
         self.do_ost_test()
-        if self.ost_result == ''
+        #if self.ost_result == ''
 
     def strategy3(self):
         return False
@@ -371,7 +371,7 @@ class Human(object):
             self.inc_cost = 0
             self.inc_utils = 0
             self.ost, self.vfa = set_ost_vfa(self.age, self.ost, self.vfa)
-            self.lab_test()
+            #self.lab_test()
             self.add_cost()
             self.add_utils()
             trans_prt=self.state_transition(prt)
@@ -470,6 +470,11 @@ class Human(object):
 
 
 if __name__ == '__main__':
-    #run_one_person(5, False, False)
-    #run_one_person(5, True, True)
-    run_groups()
+    from collections import Counter
+    c = Counter()
+    for _ in xrange(10000):
+        h = Human(65)
+        c[h.ost] += 1
+    print c
+
+
