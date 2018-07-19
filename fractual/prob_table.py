@@ -334,12 +334,12 @@ def natual_death_rate(age):
 OST_DIST = []
 for _ in xrange(3):
     OST_DIST.append({})
-OST_DIST[1]['sick']   = [5,  20, 75]
+OST_DIST[1]['sick']   = [5,  22, 73] # real sick
 OST_DIST[1]['lbm']    = [15, 70, 15]
 OST_DIST[1]['normal'] = [100, 0,  0]
 
-OST_DIST[2]['sick']   = [5,  25, 70]
-OST_DIST[2]['lbm']    = [15, 75, 10]
+OST_DIST[2]['sick']   = [2,  25, 73]
+OST_DIST[2]['lbm']    = [10, 75, 15]
 OST_DIST[2]['normal'] = [100, 0,  0]
 
 
