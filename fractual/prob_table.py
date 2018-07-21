@@ -1,6 +1,7 @@
 import random
 
-LBM_SCALE = 0.8
+LBM_SCALE1 = 0.8
+LBM_SCALE2 = 0.8
 
 PROB_TABLE = {}
 PROB_TABLE['ost_normal_no_trt'] = {}
@@ -77,39 +78,39 @@ PROB_TABLE['ost_sick_trt']['wf']['wf']  = 0.00146847
 
 PROB_TABLE['ost_lbm2_no_trt'] = {}
 PROB_TABLE['ost_lbm2_no_trt']['no_fx'] = {}
-PROB_TABLE['ost_lbm2_no_trt']['no_fx']['hip'] = LBM_SCALE * PROB_TABLE['ost_sick_no_trt']['no_fx']['hip']
-PROB_TABLE['ost_lbm2_no_trt']['no_fx']['vf']  = LBM_SCALE * PROB_TABLE['ost_sick_no_trt']['no_fx']['vf']
-PROB_TABLE['ost_lbm2_no_trt']['no_fx']['wf']  = LBM_SCALE * PROB_TABLE['ost_sick_no_trt']['no_fx']['wf']
+PROB_TABLE['ost_lbm2_no_trt']['no_fx']['hip'] = LBM_SCALE2 * PROB_TABLE['ost_sick_no_trt']['no_fx']['hip']
+PROB_TABLE['ost_lbm2_no_trt']['no_fx']['vf']  = LBM_SCALE2 * PROB_TABLE['ost_sick_no_trt']['no_fx']['vf']
+PROB_TABLE['ost_lbm2_no_trt']['no_fx']['wf']  = LBM_SCALE2 * PROB_TABLE['ost_sick_no_trt']['no_fx']['wf']
 PROB_TABLE['ost_lbm2_no_trt']['hip'] = {}
-PROB_TABLE['ost_lbm2_no_trt']['hip']['hip'] = LBM_SCALE * PROB_TABLE['ost_sick_no_trt']['hip']['hip']
-PROB_TABLE['ost_lbm2_no_trt']['hip']['vf']  = LBM_SCALE * PROB_TABLE['ost_sick_no_trt']['hip']['vf']
-PROB_TABLE['ost_lbm2_no_trt']['hip']['wf']  = LBM_SCALE * PROB_TABLE['ost_sick_no_trt']['hip']['wf']
+PROB_TABLE['ost_lbm2_no_trt']['hip']['hip'] = LBM_SCALE2 * PROB_TABLE['ost_sick_no_trt']['hip']['hip']
+PROB_TABLE['ost_lbm2_no_trt']['hip']['vf']  = LBM_SCALE2 * PROB_TABLE['ost_sick_no_trt']['hip']['vf']
+PROB_TABLE['ost_lbm2_no_trt']['hip']['wf']  = LBM_SCALE2 * PROB_TABLE['ost_sick_no_trt']['hip']['wf']
 PROB_TABLE['ost_lbm2_no_trt']['vf'] = {}
-PROB_TABLE['ost_lbm2_no_trt']['vf']['hip'] = LBM_SCALE * PROB_TABLE['ost_sick_no_trt']['vf']['hip']
-PROB_TABLE['ost_lbm2_no_trt']['vf']['vf']  = LBM_SCALE * PROB_TABLE['ost_sick_no_trt']['vf']['vf']
-PROB_TABLE['ost_lbm2_no_trt']['vf']['wf']  = LBM_SCALE * PROB_TABLE['ost_sick_no_trt']['vf']['wf']
+PROB_TABLE['ost_lbm2_no_trt']['vf']['hip'] = LBM_SCALE2 * PROB_TABLE['ost_sick_no_trt']['vf']['hip']
+PROB_TABLE['ost_lbm2_no_trt']['vf']['vf']  = LBM_SCALE2 * PROB_TABLE['ost_sick_no_trt']['vf']['vf']
+PROB_TABLE['ost_lbm2_no_trt']['vf']['wf']  = LBM_SCALE2 * PROB_TABLE['ost_sick_no_trt']['vf']['wf']
 PROB_TABLE['ost_lbm2_no_trt']['wf'] = {}
-PROB_TABLE['ost_lbm2_no_trt']['wf']['hip'] = LBM_SCALE * PROB_TABLE['ost_sick_no_trt']['wf']['hip']
-PROB_TABLE['ost_lbm2_no_trt']['wf']['vf']  = LBM_SCALE * PROB_TABLE['ost_sick_no_trt']['wf']['vf']
-PROB_TABLE['ost_lbm2_no_trt']['wf']['wf']  = LBM_SCALE * PROB_TABLE['ost_sick_no_trt']['wf']['wf']
+PROB_TABLE['ost_lbm2_no_trt']['wf']['hip'] = LBM_SCALE2 * PROB_TABLE['ost_sick_no_trt']['wf']['hip']
+PROB_TABLE['ost_lbm2_no_trt']['wf']['vf']  = LBM_SCALE2 * PROB_TABLE['ost_sick_no_trt']['wf']['vf']
+PROB_TABLE['ost_lbm2_no_trt']['wf']['wf']  = LBM_SCALE2 * PROB_TABLE['ost_sick_no_trt']['wf']['wf']
 
 PROB_TABLE['ost_lbm1_trt'] = {}
 PROB_TABLE['ost_lbm1_trt']['no_fx'] = {}
-PROB_TABLE['ost_lbm1_trt']['no_fx']['hip'] = LBM_SCALE * PROB_TABLE['ost_sick_trt']['no_fx']['hip']
-PROB_TABLE['ost_lbm1_trt']['no_fx']['vf']  = LBM_SCALE * PROB_TABLE['ost_sick_trt']['no_fx']['vf']
-PROB_TABLE['ost_lbm1_trt']['no_fx']['wf']  = LBM_SCALE * PROB_TABLE['ost_sick_trt']['no_fx']['wf']
+PROB_TABLE['ost_lbm1_trt']['no_fx']['hip'] = LBM_SCALE1 * PROB_TABLE['ost_sick_trt']['no_fx']['hip']
+PROB_TABLE['ost_lbm1_trt']['no_fx']['vf']  = LBM_SCALE1 * PROB_TABLE['ost_sick_trt']['no_fx']['vf']
+PROB_TABLE['ost_lbm1_trt']['no_fx']['wf']  = LBM_SCALE1 * PROB_TABLE['ost_sick_trt']['no_fx']['wf']
 PROB_TABLE['ost_lbm1_trt']['hip'] = {}
-PROB_TABLE['ost_lbm1_trt']['hip']['hip'] = LBM_SCALE * PROB_TABLE['ost_sick_trt']['hip']['hip']
-PROB_TABLE['ost_lbm1_trt']['hip']['vf']  = LBM_SCALE * PROB_TABLE['ost_sick_trt']['hip']['vf']
-PROB_TABLE['ost_lbm1_trt']['hip']['wf']  = LBM_SCALE * PROB_TABLE['ost_sick_trt']['hip']['wf']
+PROB_TABLE['ost_lbm1_trt']['hip']['hip'] = LBM_SCALE1 * PROB_TABLE['ost_sick_trt']['hip']['hip']
+PROB_TABLE['ost_lbm1_trt']['hip']['vf']  = LBM_SCALE1 * PROB_TABLE['ost_sick_trt']['hip']['vf']
+PROB_TABLE['ost_lbm1_trt']['hip']['wf']  = LBM_SCALE1 * PROB_TABLE['ost_sick_trt']['hip']['wf']
 PROB_TABLE['ost_lbm1_trt']['vf'] = {}
-PROB_TABLE['ost_lbm1_trt']['vf']['hip'] = LBM_SCALE * PROB_TABLE['ost_sick_trt']['vf']['hip']
-PROB_TABLE['ost_lbm1_trt']['vf']['vf']  = LBM_SCALE * PROB_TABLE['ost_sick_trt']['vf']['vf']
-PROB_TABLE['ost_lbm1_trt']['vf']['wf']  = LBM_SCALE * PROB_TABLE['ost_sick_trt']['vf']['wf']
+PROB_TABLE['ost_lbm1_trt']['vf']['hip'] = LBM_SCALE1 * PROB_TABLE['ost_sick_trt']['vf']['hip']
+PROB_TABLE['ost_lbm1_trt']['vf']['vf']  = LBM_SCALE1 * PROB_TABLE['ost_sick_trt']['vf']['vf']
+PROB_TABLE['ost_lbm1_trt']['vf']['wf']  = LBM_SCALE1 * PROB_TABLE['ost_sick_trt']['vf']['wf']
 PROB_TABLE['ost_lbm1_trt']['wf'] = {}
-PROB_TABLE['ost_lbm1_trt']['wf']['hip'] = LBM_SCALE * PROB_TABLE['ost_sick_trt']['wf']['hip']
-PROB_TABLE['ost_lbm1_trt']['wf']['vf']  = LBM_SCALE * PROB_TABLE['ost_sick_trt']['wf']['vf']
-PROB_TABLE['ost_lbm1_trt']['wf']['wf']  = LBM_SCALE * PROB_TABLE['ost_sick_trt']['wf']['wf']
+PROB_TABLE['ost_lbm1_trt']['wf']['hip'] = LBM_SCALE1 * PROB_TABLE['ost_sick_trt']['wf']['hip']
+PROB_TABLE['ost_lbm1_trt']['wf']['vf']  = LBM_SCALE1 * PROB_TABLE['ost_sick_trt']['wf']['vf']
+PROB_TABLE['ost_lbm1_trt']['wf']['wf']  = LBM_SCALE1 * PROB_TABLE['ost_sick_trt']['wf']['wf']
 
 PROB_TABLE['has_vfa_no_trt'] = {}
 PROB_TABLE['has_vfa_no_trt']['no_fx'] = {}
@@ -392,6 +393,29 @@ def get_ost_test_result(ost, threshold):
             return 'sick'
         raise Exception("bad probability")
     raise Exception("bad probability")
+
+
+def take_ost_trt():
+    p = random.random()
+    if p <= 0.25:
+        return p
+
+
+VFA_SENSI = 0.85
+VFA_SPEC = 0.92
+
+def get_vfa_test_result(vfa):
+    p = random.random()
+    if vfa:
+        if p < VFA_SENSI:
+            return 'Pos'
+        else:
+            return 'Neg'
+    else:
+        if random.random() > VFA_SPEC:
+            return 'Pos'
+        else:
+            return 'Neg'
 
 
 
