@@ -1,153 +1,128 @@
+import logging
 import random
+import os
+
+logging.basicConfig()
+log = logging.getLogger("prob_table")
+log.setLevel(logging.DEBUG)
+
+
 
 LBM_SCALE1 = 0.8
 LBM_SCALE2 = 0.8
 
 PROB_TABLE = {}
-PROB_TABLE['ost_normal_no_trt'] = {}
-PROB_TABLE['ost_normal_no_trt']['no_fx'] = {}
-PROB_TABLE['ost_normal_no_trt']['no_fx']['hip'] = 0.00070024
-PROB_TABLE['ost_normal_no_trt']['no_fx']['vf']  = 0.00070024
-PROB_TABLE['ost_normal_no_trt']['no_fx']['wf']  = 0.00006299
-PROB_TABLE['ost_normal_no_trt']['hip'] = {}
-PROB_TABLE['ost_normal_no_trt']['hip']['hip'] = 0.00786026
-PROB_TABLE['ost_normal_no_trt']['hip']['vf']  = 0.00480247
-PROB_TABLE['ost_normal_no_trt']['hip']['wf']  = 0.0025
-PROB_TABLE['ost_normal_no_trt']['vf'] = {}
-PROB_TABLE['ost_normal_no_trt']['vf']['hip'] = 0.00370072
-PROB_TABLE['ost_normal_no_trt']['vf']['vf']  = 0.02480771
-PROB_TABLE['ost_normal_no_trt']['vf']['wf']  = 0.00511307
-PROB_TABLE['ost_normal_no_trt']['wf'] = {}
-PROB_TABLE['ost_normal_no_trt']['wf']['hip'] = 0.00257979
-PROB_TABLE['ost_normal_no_trt']['wf']['vf']  = 0.00220672
-PROB_TABLE['ost_normal_no_trt']['wf']['wf']  = 0.00175901
+PROB_TABLE[('normal', 'no_trt')] = {}
+PROB_TABLE[('normal', 'no_trt')]['no_fx'] = {}
+PROB_TABLE[('normal', 'no_trt')]['no_fx']['hip'] = 0.00070024
+PROB_TABLE[('normal', 'no_trt')]['no_fx']['vf']  = 0.00070024
+PROB_TABLE[('normal', 'no_trt')]['no_fx']['wf']  = 0.00006299
+PROB_TABLE[('normal', 'no_trt')]['hip'] = {}
+PROB_TABLE[('normal', 'no_trt')]['hip']['hip'] = 0.00786026
+PROB_TABLE[('normal', 'no_trt')]['hip']['vf']  = 0.00480247
+PROB_TABLE[('normal', 'no_trt')]['hip']['wf']  = 0.0025
+PROB_TABLE[('normal', 'no_trt')]['vf'] = {}
+PROB_TABLE[('normal', 'no_trt')]['vf']['hip'] = 0.00370072
+PROB_TABLE[('normal', 'no_trt')]['vf']['vf']  = 0.02480771
+PROB_TABLE[('normal', 'no_trt')]['vf']['wf']  = 0.00511307
+PROB_TABLE[('normal', 'no_trt')]['wf'] = {}
+PROB_TABLE[('normal', 'no_trt')]['wf']['hip'] = 0.00257979
+PROB_TABLE[('normal', 'no_trt')]['wf']['vf']  = 0.00220672
+PROB_TABLE[('normal', 'no_trt')]['wf']['wf']  = 0.00175901
 
-PROB_TABLE['ost_normal_trt'] = {}
-PROB_TABLE['ost_normal_trt']['no_fx'] = {}
-PROB_TABLE['ost_normal_trt']['no_fx']['hip'] = 0.000308106
-PROB_TABLE['ost_normal_trt']['no_fx']['vf']  = 0.00039213
-PROB_TABLE['ost_normal_trt']['no_fx']['wf']  = 0.00005543
-PROB_TABLE['ost_normal_trt']['hip'] = {}
-PROB_TABLE['ost_normal_trt']['hip']['hip'] = 0.00345851
-PROB_TABLE['ost_normal_trt']['hip']['vf']  = 0.00268938
-PROB_TABLE['ost_normal_trt']['hip']['wf']  = 0.0022
-PROB_TABLE['ost_normal_trt']['vf'] = {}
-PROB_TABLE['ost_normal_trt']['vf']['hip'] = 0.001628317
-PROB_TABLE['ost_normal_trt']['vf']['vf']  = 0.013892318
-PROB_TABLE['ost_normal_trt']['vf']['wf']  = 0.004499502
-PROB_TABLE['ost_normal_trt']['wf'] = {}
-PROB_TABLE['ost_normal_trt']['wf']['hip'] = 0.001135108
-PROB_TABLE['ost_normal_trt']['wf']['vf']  = 0.001235763
-PROB_TABLE['ost_normal_trt']['wf']['wf']  = 0.001547929
+PROB_TABLE[('sick', 'no_trt')] = {}
+PROB_TABLE[('sick', 'no_trt')]['no_fx'] = {}
+PROB_TABLE[('sick', 'no_trt')]['no_fx']['hip'] = 0.00277684
+PROB_TABLE[('sick', 'no_trt')]['no_fx']['vf']  = 0.00744093
+PROB_TABLE[('sick', 'no_trt')]['no_fx']['wf']  = 0.00599948
+PROB_TABLE[('sick', 'no_trt')]['hip'] = {}
+PROB_TABLE[('sick', 'no_trt')]['hip']['hip'] = 0.01786026
+PROB_TABLE[('sick', 'no_trt')]['hip']['vf']  = 0.00780247
+PROB_TABLE[('sick', 'no_trt')]['hip']['wf']  = 0.0055
+PROB_TABLE[('sick', 'no_trt')]['vf'] = {}
+PROB_TABLE[('sick', 'no_trt')]['vf']['hip'] = 0.00631997
+PROB_TABLE[('sick', 'no_trt')]['vf']['vf']  = 0.02672291
+PROB_TABLE[('sick', 'no_trt')]['vf']['wf']  = 0.00695305
+PROB_TABLE[('sick', 'no_trt')]['wf'] = {}
+PROB_TABLE[('sick', 'no_trt')]['wf']['hip'] = 0.00357979
+PROB_TABLE[('sick', 'no_trt')]['wf']['vf']  = 0.00320672
+PROB_TABLE[('sick', 'no_trt')]['wf']['wf']  = 0.00275901
 
-PROB_TABLE['ost_sick_no_trt'] = {}
-PROB_TABLE['ost_sick_no_trt']['no_fx'] = {}
-PROB_TABLE['ost_sick_no_trt']['no_fx']['hip'] = 0.00277684
-PROB_TABLE['ost_sick_no_trt']['no_fx']['vf']  = 0.00744093
-PROB_TABLE['ost_sick_no_trt']['no_fx']['wf']  = 0.00599948
-PROB_TABLE['ost_sick_no_trt']['hip'] = {}
-PROB_TABLE['ost_sick_no_trt']['hip']['hip'] = 0.01786026
-PROB_TABLE['ost_sick_no_trt']['hip']['vf']  = 0.00780247
-PROB_TABLE['ost_sick_no_trt']['hip']['wf']  = 0.0055
-PROB_TABLE['ost_sick_no_trt']['vf'] = {}
-PROB_TABLE['ost_sick_no_trt']['vf']['hip'] = 0.00631997
-PROB_TABLE['ost_sick_no_trt']['vf']['vf']  = 0.02672291
-PROB_TABLE['ost_sick_no_trt']['vf']['wf']  = 0.00695305
-PROB_TABLE['ost_sick_no_trt']['wf'] = {}
-PROB_TABLE['ost_sick_no_trt']['wf']['hip'] = 0.00357979
-PROB_TABLE['ost_sick_no_trt']['wf']['vf']  = 0.00320672
-PROB_TABLE['ost_sick_no_trt']['wf']['wf']  = 0.00275901
+PROB_TABLE[('sick', 'trt')] = {}
+PROB_TABLE[('sick', 'trt')]['no_fx'] = {}
+PROB_TABLE[('sick', 'trt')]['no_fx']['hip'] = 0.0012555
+PROB_TABLE[('sick', 'trt')]['no_fx']['vf']  = 0.00264944
+PROB_TABLE[('sick', 'trt')]['no_fx']['wf']  = 0.00534908
+PROB_TABLE[('sick', 'trt')]['hip'] = {}
+PROB_TABLE[('sick', 'trt')]['hip']['hip'] = 0.00520493
+PROB_TABLE[('sick', 'trt')]['hip']['vf']  = 0.00402953
+PROB_TABLE[('sick', 'trt')]['hip']['wf']  = 0.00292734
+PROB_TABLE[('sick', 'trt')]['vf'] = {}
+PROB_TABLE[('sick', 'trt')]['vf']['hip'] = 0.0018418
+PROB_TABLE[('sick', 'trt')]['vf']['vf']  = 0.01380084
+PROB_TABLE[('sick', 'trt')]['vf']['wf']  = 0.00370072
+PROB_TABLE[('sick', 'trt')]['wf'] = {}
+PROB_TABLE[('sick', 'trt')]['wf']['hip'] = 0.00104324
+PROB_TABLE[('sick', 'trt')]['wf']['vf']  = 0.00165609
+PROB_TABLE[('sick', 'trt')]['wf']['wf']  = 0.00146847
 
-PROB_TABLE['ost_sick_trt'] = {}
-PROB_TABLE['ost_sick_trt']['no_fx'] = {}
-PROB_TABLE['ost_sick_trt']['no_fx']['hip'] = 0.0012555
-PROB_TABLE['ost_sick_trt']['no_fx']['vf']  = 0.00264944
-PROB_TABLE['ost_sick_trt']['no_fx']['wf']  = 0.00534908
-PROB_TABLE['ost_sick_trt']['hip'] = {}
-PROB_TABLE['ost_sick_trt']['hip']['hip'] = 0.00520493
-PROB_TABLE['ost_sick_trt']['hip']['vf']  = 0.00402953
-PROB_TABLE['ost_sick_trt']['hip']['wf']  = 0.00292734
-PROB_TABLE['ost_sick_trt']['vf'] = {}
-PROB_TABLE['ost_sick_trt']['vf']['hip'] = 0.0018418
-PROB_TABLE['ost_sick_trt']['vf']['vf']  = 0.01380084
-PROB_TABLE['ost_sick_trt']['vf']['wf']  = 0.00370072
-PROB_TABLE['ost_sick_trt']['wf'] = {}
-PROB_TABLE['ost_sick_trt']['wf']['hip'] = 0.00104324
-PROB_TABLE['ost_sick_trt']['wf']['vf']  = 0.00165609
-PROB_TABLE['ost_sick_trt']['wf']['wf']  = 0.00146847
+LBM1_NO_TRT_SCALE = 0.7
+LBL_NO_TRT_SCALE = 0.2
+LBM1_TRT_SCALE = 0.7
+LBL_TRT_SCALE = 0.2
 
-PROB_TABLE['ost_lbm2_no_trt'] = {}
-PROB_TABLE['ost_lbm2_no_trt']['no_fx'] = {}
-PROB_TABLE['ost_lbm2_no_trt']['no_fx']['hip'] = LBM_SCALE2 * PROB_TABLE['ost_sick_no_trt']['no_fx']['hip']
-PROB_TABLE['ost_lbm2_no_trt']['no_fx']['vf']  = LBM_SCALE2 * PROB_TABLE['ost_sick_no_trt']['no_fx']['vf']
-PROB_TABLE['ost_lbm2_no_trt']['no_fx']['wf']  = LBM_SCALE2 * PROB_TABLE['ost_sick_no_trt']['no_fx']['wf']
-PROB_TABLE['ost_lbm2_no_trt']['hip'] = {}
-PROB_TABLE['ost_lbm2_no_trt']['hip']['hip'] = LBM_SCALE2 * PROB_TABLE['ost_sick_no_trt']['hip']['hip']
-PROB_TABLE['ost_lbm2_no_trt']['hip']['vf']  = LBM_SCALE2 * PROB_TABLE['ost_sick_no_trt']['hip']['vf']
-PROB_TABLE['ost_lbm2_no_trt']['hip']['wf']  = LBM_SCALE2 * PROB_TABLE['ost_sick_no_trt']['hip']['wf']
-PROB_TABLE['ost_lbm2_no_trt']['vf'] = {}
-PROB_TABLE['ost_lbm2_no_trt']['vf']['hip'] = LBM_SCALE2 * PROB_TABLE['ost_sick_no_trt']['vf']['hip']
-PROB_TABLE['ost_lbm2_no_trt']['vf']['vf']  = LBM_SCALE2 * PROB_TABLE['ost_sick_no_trt']['vf']['vf']
-PROB_TABLE['ost_lbm2_no_trt']['vf']['wf']  = LBM_SCALE2 * PROB_TABLE['ost_sick_no_trt']['vf']['wf']
-PROB_TABLE['ost_lbm2_no_trt']['wf'] = {}
-PROB_TABLE['ost_lbm2_no_trt']['wf']['hip'] = LBM_SCALE2 * PROB_TABLE['ost_sick_no_trt']['wf']['hip']
-PROB_TABLE['ost_lbm2_no_trt']['wf']['vf']  = LBM_SCALE2 * PROB_TABLE['ost_sick_no_trt']['wf']['vf']
-PROB_TABLE['ost_lbm2_no_trt']['wf']['wf']  = LBM_SCALE2 * PROB_TABLE['ost_sick_no_trt']['wf']['wf']
 
-PROB_TABLE['ost_lbm1_trt'] = {}
-PROB_TABLE['ost_lbm1_trt']['no_fx'] = {}
-PROB_TABLE['ost_lbm1_trt']['no_fx']['hip'] = LBM_SCALE1 * PROB_TABLE['ost_sick_trt']['no_fx']['hip']
-PROB_TABLE['ost_lbm1_trt']['no_fx']['vf']  = LBM_SCALE1 * PROB_TABLE['ost_sick_trt']['no_fx']['vf']
-PROB_TABLE['ost_lbm1_trt']['no_fx']['wf']  = LBM_SCALE1 * PROB_TABLE['ost_sick_trt']['no_fx']['wf']
-PROB_TABLE['ost_lbm1_trt']['hip'] = {}
-PROB_TABLE['ost_lbm1_trt']['hip']['hip'] = LBM_SCALE1 * PROB_TABLE['ost_sick_trt']['hip']['hip']
-PROB_TABLE['ost_lbm1_trt']['hip']['vf']  = LBM_SCALE1 * PROB_TABLE['ost_sick_trt']['hip']['vf']
-PROB_TABLE['ost_lbm1_trt']['hip']['wf']  = LBM_SCALE1 * PROB_TABLE['ost_sick_trt']['hip']['wf']
-PROB_TABLE['ost_lbm1_trt']['vf'] = {}
-PROB_TABLE['ost_lbm1_trt']['vf']['hip'] = LBM_SCALE1 * PROB_TABLE['ost_sick_trt']['vf']['hip']
-PROB_TABLE['ost_lbm1_trt']['vf']['vf']  = LBM_SCALE1 * PROB_TABLE['ost_sick_trt']['vf']['vf']
-PROB_TABLE['ost_lbm1_trt']['vf']['wf']  = LBM_SCALE1 * PROB_TABLE['ost_sick_trt']['vf']['wf']
-PROB_TABLE['ost_lbm1_trt']['wf'] = {}
-PROB_TABLE['ost_lbm1_trt']['wf']['hip'] = LBM_SCALE1 * PROB_TABLE['ost_sick_trt']['wf']['hip']
-PROB_TABLE['ost_lbm1_trt']['wf']['vf']  = LBM_SCALE1 * PROB_TABLE['ost_sick_trt']['wf']['vf']
-PROB_TABLE['ost_lbm1_trt']['wf']['wf']  = LBM_SCALE1 * PROB_TABLE['ost_sick_trt']['wf']['wf']
+PROB_TABLE[('lbm1', 'no_trt')] = {}
+PROB_TABLE[('lbl',  'no_trt')] = {}
+PROB_TABLE[('lbm1',    'trt')] = {}
+PROB_TABLE[('lbl',     'trt')] = {}
 
-PROB_TABLE['has_vfa_no_trt'] = {}
-PROB_TABLE['has_vfa_no_trt']['no_fx'] = {}
-PROB_TABLE['has_vfa_no_trt']['no_fx']['hip'] = 0.01453593
-PROB_TABLE['has_vfa_no_trt']['no_fx']['vf']  = 0.02672291
-PROB_TABLE['has_vfa_no_trt']['no_fx']['wf']  = 0.0111249
-PROB_TABLE['has_vfa_no_trt']['hip'] = {}
-PROB_TABLE['has_vfa_no_trt']['hip']['hip'] = 0.018078598
-PROB_TABLE['has_vfa_no_trt']['hip']['vf']  = 0.06051112
-PROB_TABLE['has_vfa_no_trt']['hip']['wf']  = 0.004
-PROB_TABLE['has_vfa_no_trt']['vf'] = {}
-PROB_TABLE['has_vfa_no_trt']['vf']['hip'] = 0.00631997
-PROB_TABLE['has_vfa_no_trt']['vf']['vf']  = 0.33670867
-PROB_TABLE['has_vfa_no_trt']['vf']['wf']  = 0.00695305
-PROB_TABLE['has_vfa_no_trt']['wf'] = {}
-PROB_TABLE['has_vfa_no_trt']['wf']['hip'] = 0.00593352
-PROB_TABLE['has_vfa_no_trt']['wf']['vf']  = 0.02780467
-PROB_TABLE['has_vfa_no_trt']['wf']['wf']  = 0.00281442
+for src in ['no_fx', 'hip', 'vf', 'wf']:
+    PROB_TABLE[('lbm1', 'no_trt')][src] = {}
+    PROB_TABLE[('lbl',  'no_trt')][src] = {}
+    PROB_TABLE[('lbm1',    'trt')][src] = {}
+    PROB_TABLE[('lbl',     'trt')][src] = {}
+    for sink in ['hip', 'vf', 'wf']:
+        PROB_TABLE[('lbm1', 'no_trt')][src][sink] = LBM1_NO_TRT_SCALE *(PROB_TABLE[('sick', 'no_trt')][src][sink] - PROB_TABLE[('normal', 'no_trt')][src][sink]) + PROB_TABLE[('normal', 'no_trt')][src][sink]
+        PROB_TABLE[('lbl',  'no_trt')][src][sink] = LBL_NO_TRT_SCALE  *(PROB_TABLE[('sick', 'no_trt')][src][sink] - PROB_TABLE[('normal', 'no_trt')][src][sink]) + PROB_TABLE[('normal', 'no_trt')][src][sink]
+        PROB_TABLE[('lbm1',    'trt')][src][sink] = LBM1_NO_TRT_SCALE *(PROB_TABLE[('sick',    'trt')][src][sink] - PROB_TABLE[('normal', 'no_trt')][src][sink]) + PROB_TABLE[('normal', 'no_trt')][src][sink]
+        PROB_TABLE[('lbl',     'trt')][src][sink] = LBL_NO_TRT_SCALE  *(PROB_TABLE[('sick',    'trt')][src][sink] - PROB_TABLE[('normal', 'no_trt')][src][sink]) + PROB_TABLE[('normal', 'no_trt')][src][sink]
 
-PROB_TABLE['has_vfa_trt'] = {}
-PROB_TABLE['has_vfa_trt']['no_fx'] = {}
-PROB_TABLE['has_vfa_trt']['no_fx']['hip'] = 0.00639581
-PROB_TABLE['has_vfa_trt']['no_fx']['vf']  = 0.0138084
-PROB_TABLE['has_vfa_trt']['no_fx']['wf']  = 0.00978989
-PROB_TABLE['has_vfa_trt']['hip'] = {}
-PROB_TABLE['has_vfa_trt']['hip']['hip'] = 0.00795458
-PROB_TABLE['has_vfa_trt']['hip']['vf']  = 0.03388623
-PROB_TABLE['has_vfa_trt']['hip']['wf']  = 0.00352
-PROB_TABLE['has_vfa_trt']['vf'] = {}
-PROB_TABLE['has_vfa_trt']['vf']['hip'] = 0.0018418
-PROB_TABLE['has_vfa_trt']['vf']['vf']  = 0.18855685
-PROB_TABLE['has_vfa_trt']['vf']['wf']  = 0.00370072
-PROB_TABLE['has_vfa_trt']['wf'] = {}
-PROB_TABLE['has_vfa_trt']['wf']['hip'] = 0.00261075
-PROB_TABLE['has_vfa_trt']['wf']['vf']  = 0.01557062
-PROB_TABLE['has_vfa_trt']['wf']['wf']  = 0.00247669
+PROB_TABLE['vfa', 'no_trt'] = {}
+PROB_TABLE['vfa', 'no_trt']['no_fx'] = {}
+PROB_TABLE['vfa', 'no_trt']['no_fx']['hip'] = 0.01453593
+PROB_TABLE['vfa', 'no_trt']['no_fx']['vf']  = 0.02672291
+PROB_TABLE['vfa', 'no_trt']['no_fx']['wf']  = 0.0111249
+PROB_TABLE['vfa', 'no_trt']['hip'] = {}
+PROB_TABLE['vfa', 'no_trt']['hip']['hip'] = 0.018078598
+PROB_TABLE['vfa', 'no_trt']['hip']['vf']  = 0.06051112
+PROB_TABLE['vfa', 'no_trt']['hip']['wf']  = 0.004
+PROB_TABLE['vfa', 'no_trt']['vf'] = {}
+PROB_TABLE['vfa', 'no_trt']['vf']['hip'] = 0.00631997
+PROB_TABLE['vfa', 'no_trt']['vf']['vf']  = 0.33670867
+PROB_TABLE['vfa', 'no_trt']['vf']['wf']  = 0.00695305
+PROB_TABLE['vfa', 'no_trt']['wf'] = {}
+PROB_TABLE['vfa', 'no_trt']['wf']['hip'] = 0.00593352
+PROB_TABLE['vfa', 'no_trt']['wf']['vf']  = 0.02780467
+PROB_TABLE['vfa', 'no_trt']['wf']['wf']  = 0.00281442
 
+PROB_TABLE['vfa', 'trt'] = {}
+PROB_TABLE['vfa', 'trt']['no_fx'] = {}
+PROB_TABLE['vfa', 'trt']['no_fx']['hip'] = 0.00639581
+PROB_TABLE['vfa', 'trt']['no_fx']['vf']  = 0.0138084
+PROB_TABLE['vfa', 'trt']['no_fx']['wf']  = 0.00978989
+PROB_TABLE['vfa', 'trt']['hip'] = {}
+PROB_TABLE['vfa', 'trt']['hip']['hip'] = 0.00795458
+PROB_TABLE['vfa', 'trt']['hip']['vf']  = 0.03388623
+PROB_TABLE['vfa', 'trt']['hip']['wf']  = 0.00352
+PROB_TABLE['vfa', 'trt']['vf'] = {}
+PROB_TABLE['vfa', 'trt']['vf']['hip'] = 0.0018418
+PROB_TABLE['vfa', 'trt']['vf']['vf']  = 0.18855685
+PROB_TABLE['vfa', 'trt']['vf']['wf']  = 0.00370072
+PROB_TABLE['vfa', 'trt']['wf'] = {}
+PROB_TABLE['vfa', 'trt']['wf']['hip'] = 0.00261075
+PROB_TABLE['vfa', 'trt']['wf']['vf']  = 0.01557062
+PROB_TABLE['vfa', 'trt']['wf']['wf']  = 0.00247669
 
 def vfa_preval(age):
     if age < 60:
@@ -197,66 +172,62 @@ VFA_PREVAL[70] = 0.0647
 VFA_PREVAL_60 = (VFA_PREVAL[60] - VFA_PREVAL[50])/(1-VFA_PREVAL[50])
 VFA_PREVAL_70 = (VFA_PREVAL[70] - VFA_PREVAL[60])/(1-VFA_PREVAL[60])
 
-OST_PREVAL = {}
-OST_PREVAL[55] = 0.561
-OST_PREVAL[60] = 0.657
-OST_PREVAL[70] = 0.775
-OST_PREVAL[80] = 0.876
-OST_PREVAL_60 = (OST_PREVAL[60] - OST_PREVAL[55])/(1-OST_PREVAL[55])
-OST_PREVAL_70 = (OST_PREVAL[70] - OST_PREVAL[60])/(1-OST_PREVAL[60])
-OST_PREVAL_80 = (OST_PREVAL[80] - OST_PREVAL[70])/(1-OST_PREVAL[70])
-
 OST_SICK_PREVAL = {}
-OST_SICK_PREVAL[55] = 0.068
 OST_SICK_PREVAL[60] = 0.123
 OST_SICK_PREVAL[70] = 0.257
 OST_SICK_PREVAL[80] = 0.349
 
-OST_LBM_PREVAL = {}
-OST_LBM_PREVAL[55] = 0.493
-OST_LBM_PREVAL[60] = 0.534
-OST_LBM_PREVAL[70] = 0.518
-OST_LBM_PREVAL[80] = 0.527
-OST_SICK_NEW = {}
-OST_SICK_NEW[60] = (OST_SICK_PREVAL[60] - OST_SICK_PREVAL[55])/OST_LBM_PREVAL[55]
-OST_SICK_NEW[70] = (OST_SICK_PREVAL[70] - OST_SICK_PREVAL[60])/OST_LBM_PREVAL[60]
-OST_SICK_NEW[80] = (OST_SICK_PREVAL[80] - OST_SICK_PREVAL[70])/OST_LBM_PREVAL[70]
 
 OST_LBM1_PREVAL = {}
-#OST_LBM1_PREVAL[55] = 0.493
 OST_LBM1_PREVAL[60] = 0.454
 OST_LBM1_PREVAL[70] = 0.440
 OST_LBM1_PREVAL[80] = 0.448
-OST_SICK_NEW = {}
-OST_SICK_NEW[60] = (OST_SICK_PREVAL[60] - OST_SICK_PREVAL[55])/OST_LBM_PREVAL[55]
-OST_SICK_NEW[70] = (OST_SICK_PREVAL[70] - OST_SICK_PREVAL[60])/OST_LBM_PREVAL[60]
-OST_SICK_NEW[80] = (OST_SICK_PREVAL[80] - OST_SICK_PREVAL[70])/OST_LBM_PREVAL[70]
 
 OST_LBM2_PREVAL = {}
-#OST_LBM2_PREVAL[55] = 0.493
 OST_LBM2_PREVAL[60] = 0.534
 OST_LBM2_PREVAL[70] = 0.518
 OST_LBM2_PREVAL[80] = 0.527
-OST_SICK_NEW = {}
-OST_SICK_NEW[60] = (OST_SICK_PREVAL[60] - OST_SICK_PREVAL[55])/OST_LBM_PREVAL[55]
-OST_SICK_NEW[70] = (OST_SICK_PREVAL[70] - OST_SICK_PREVAL[60])/OST_LBM_PREVAL[60]
-OST_SICK_NEW[80] = (OST_SICK_PREVAL[80] - OST_SICK_PREVAL[70])/OST_LBM_PREVAL[70]
+
+OST_LBL_PREVAL = {}
+OST_LBL_PREVAL[60] = OST_LBM2_PREVAL[60] - OST_LBM1_PREVAL[60]
+OST_LBL_PREVAL[70] = OST_LBM2_PREVAL[70] - OST_LBM1_PREVAL[70]
+OST_LBL_PREVAL[80] = OST_LBM2_PREVAL[80] - OST_LBM1_PREVAL[80]
 
 OST_NORMAL_PREVAL = {}
-OST_NORMAL_PREVAL[55] = 1 - OST_LBM_PREVAL[55] - OST_SICK_PREVAL[55]
-OST_NORMAL_PREVAL[60] = 1 - OST_LBM_PREVAL[60] - OST_SICK_PREVAL[60]
-OST_NORMAL_PREVAL[70] = 1 - OST_LBM_PREVAL[70] - OST_SICK_PREVAL[70]
-OST_NORMAL_PREVAL[80] = 1 - OST_LBM_PREVAL[80] - OST_SICK_PREVAL[80]
-OST_LBM_NEW = {}
-OST_LBM_NEW[60] = (OST_SICK_PREVAL[60] - OST_SICK_PREVAL[55] + OST_LBM_PREVAL[60] - OST_LBM_PREVAL[55])/OST_NORMAL_PREVAL[55]
-OST_LBM_NEW[70] = (OST_SICK_PREVAL[70] - OST_SICK_PREVAL[60] + OST_LBM_PREVAL[70] - OST_LBM_PREVAL[60])/OST_NORMAL_PREVAL[60]
-OST_LBM_NEW[80] = (OST_SICK_PREVAL[80] - OST_SICK_PREVAL[70] + OST_LBM_PREVAL[80] - OST_LBM_PREVAL[70])/OST_NORMAL_PREVAL[70]
-if OST_LBM_NEW[60] < 0 or OST_LBM_NEW[60] >1:
-    raise Exception("OST_LBM_NEW_60 out of range")
-if OST_LBM_NEW[70] < 0 or OST_LBM_NEW[70] >1:
-    raise Exception("OST_LBM_NEW_70 out of range")
-if OST_LBM_NEW[80] < 0 or OST_LBM_NEW[80] >1:
-    raise Exception("OST_LBM_NEW_80 out of range")
+OST_NORMAL_PREVAL[60] = 1 - OST_LBM2_PREVAL[60] - OST_SICK_PREVAL[60]
+OST_NORMAL_PREVAL[70] = 1 - OST_LBM2_PREVAL[70] - OST_SICK_PREVAL[70]
+OST_NORMAL_PREVAL[80] = 1 - OST_LBM2_PREVAL[80] - OST_SICK_PREVAL[80]
+
+OST_LBM1_TO_SICK={}
+OST_NORMAL_TO_LBM1={}
+OST_NORMAL_TO_LBL={}
+for age in [70, 80]:
+    sick_inc = (OST_SICK_PREVAL[age]-OST_SICK_PREVAL[age-10])
+    log.debug("at age {}, sick will increase is {:5f}, lbm1 preval is {:5f}".format(age-10, sick_inc, OST_LBM1_PREVAL[age-10]))
+    if sick_inc <= 0:
+        raise Exception("sick prevail reduced")
+    if OST_LBM1_PREVAL[age-10] < sick_inc:
+        raise Exception("sick prevail reduced")
+    OST_LBM1_TO_SICK[age] = sick_inc/OST_LBM1_PREVAL[age]
+    lbm1_leftover = OST_LBM1_PREVAL[age-10] - sick_inc
+    log.debug("at age {}, LBM to SICK ratio is {:5f}, lbm1 preval leftover {:5f}".format(age-10, OST_LBM1_TO_SICK[age], lbm1_leftover))
+    lbm1_needed = OST_LBM1_PREVAL[age] - lbm1_leftover
+    log.debug("at age {}, LBM1 preval is {:5f}, lbm1 need to add {:5f}, lbl at {} is {}".format(age, OST_LBM1_PREVAL[age], lbm1_needed, age-10, OST_LBL_PREVAL[age-10]))
+    if lbm1_needed < 0:
+        raise Exception("lbm1 needed is negative")
+    lbm1_needed_from_normal = lbm1_needed - OST_LBL_PREVAL[age-10]
+    if lbm1_needed_from_normal < 0:
+        raise Exception("lbm1_needed_leftover is negative")
+    log.debug("at age {}, lbm1_needed_leftover for normal is {:5f}".format(age, lbm1_needed_from_normal))
+    OST_NORMAL_TO_LBM1[age] = lbm1_needed_from_normal/OST_NORMAL_PREVAL[age-10]
+    OST_NORMAL_TO_LBL[age] = OST_LBL_PREVAL[age]/OST_NORMAL_PREVAL[age-10]
+    log.debug("OST_NORMAL_PREVAL at age {} is {}, normal to lbm1 ratio at age {} is {:5f}, to lbl ratio is {}".format(age-10, OST_NORMAL_PREVAL[age-10], age, OST_NORMAL_TO_LBM1[age], OST_NORMAL_TO_LBL[age]))
+
+
+
+
+
+
 
 VFA_OST_NORMAL = 0.085
 VFA_OST_LBM = 0.157
@@ -421,31 +392,36 @@ def get_vfa_test_result(vfa):
 
 
 if __name__ == '__main__':
-    from collections import Counter
-    c = {}
-    c[('sick', 1)] = Counter()
-    for _ in range(100000):
-        c[('sick', 1)][get_ost_test_result('sick', 1)] += 1
-    c[('lbm', 1)] = Counter()
-    for _ in range(100000):
-        c[('lbm', 1)][get_ost_test_result('lbm', 1)] += 1
-    c[('normal', 1)] = Counter()
-    for _ in range(100000):
-        c[('normal', 1)][get_ost_test_result('normal', 1)] += 1
+    pass
+    # print OST_SICK_PREVAL
+    # print OST_LBM1_PREVAL
+    # print OST_LBL_PREVAL
+    # print OST_NORMAL_PREVAL
+    # from collections import Counter
+    # c = {}
+    # c[('sick', 1)] = Counter()
+    # for _ in range(100000):
+    #     c[('sick', 1)][get_ost_test_result('sick', 1)] += 1
+    # c[('lbm', 1)] = Counter()
+    # for _ in range(100000):
+    #     c[('lbm', 1)][get_ost_test_result('lbm', 1)] += 1
+    # c[('normal', 1)] = Counter()
+    # for _ in range(100000):
+    #     c[('normal', 1)][get_ost_test_result('normal', 1)] += 1
 
-    c[('sick', 2)] = Counter()
-    for _ in range(100000):
-        c[('sick', 2)][get_ost_test_result('sick', 2)] += 1
-    c[('lbm', 2)] = Counter()
-    for _ in range(100000):
-        c[('lbm', 2)][get_ost_test_result('lbm', 2)] += 1
-    c[('normal', 2)] = Counter()
-    for _ in range(100000):
-        c[('normal', 2)][get_ost_test_result('normal', 2)] += 1
+    # c[('sick', 2)] = Counter()
+    # for _ in range(100000):
+    #     c[('sick', 2)][get_ost_test_result('sick', 2)] += 1
+    # c[('lbm', 2)] = Counter()
+    # for _ in range(100000):
+    #     c[('lbm', 2)][get_ost_test_result('lbm', 2)] += 1
+    # c[('normal', 2)] = Counter()
+    # for _ in range(100000):
+    #     c[('normal', 2)][get_ost_test_result('normal', 2)] += 1
 
-    print NORMALIZED_OST_DIST
-    for k,v in c.iteritems():
-        print k, v
+    # print NORMALIZED_OST_DIST
+    # for k,v in c.iteritems():
+    #     print k, v
 
 
 

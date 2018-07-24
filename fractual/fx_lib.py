@@ -1,3 +1,4 @@
+import os
 import sys
 import logging
 import random
@@ -16,24 +17,20 @@ DISCOUNT_RATE = 0.03
 DISCOUNT = 1-DISCOUNT_RATE/2
 EFF_DELAY = 2
 
+THRESHOLD = int(os.environ['OST_THRESHOLD'])
+DO_VFA = int(os.environ['DO_VFA'])
 
-def to_status_str(ost, vfa, trt):
-    if (not ost) and (not vfa) and (not trt):
-        return 'no_ost_no_trt'
-    elif (not ost) and (not vfa) and trt:
-        return 'no_ost_trt'
-    elif (not ost) and vfa and (not trt):
-        return 'has_vfa_no_trt'
-    elif (not ost) and vfa and trt:
-        return 'has_vfa_trt'
-    elif ost and (not vfa) and (not trt):
-        return 'has_ost_no_trt'
-    elif ost and (not vfa) and trt:
-        return 'has_ost_trt'
-    elif ost and vfa and (not trt):
-        return 'has_vfa_no_trt'
-    elif ost and vfa and trt:
-        return 'has_vfa_trt'
+
+def to_status_str(ost, vfa, trt, threshold):
+    if vfa:
+        s0 = 'vfa'
+    elif ost == 'lbm':
+        s0 = 'lbm'+ str(threshold)
+    else:
+        s0 == ost
+    s1 = 'trt' if trt else 'no_trt'
+    return (s0, s1)
+
 
 def get_utility(fx, age):
     if fx in ['no_fx', 'wf']:
@@ -116,7 +113,7 @@ class Human(object):
         ost = 'ost' if self.ost else 'no_ost'
         vfa = 'vfa' if self.ost else 'no_vfa'
         header = "age={:5},next_test={:5}, drug_end={:6}, last_hip={:4}, last_vf={:4}, last_wf={:4}, <inc_utils={:8.3f} acc_utils={:8.3f} | inc_cost={:12.3f} acc_cost={:12.3f}> |{:6}, {:6}| fx={:6}".format(
-                self.age, self.next_test, self.drug_end, self.last_hip, self.last_vf, self.last_wf, self.inc_utils, self.acc_utils, self.inc_cost, self.acc_cost, ost, vfa, self.fx)
+                self.age, self.next_test, self.drug_end, self.last_hip, self.last_vf, self.last_wf, self.stats.inc_utils, self.stats.total_utils, self.inc_cost, self.acc_cost, ost, vfa, self.fx)
 
         if self.fx != 'death':
             return "{}   trt={:6},len={:2},eff={:6}, holiday_end={:5} ost_result={:6}, vfa_result={:6}, hip_cnt={:2}, vf_cnt={:2}, wf_cnt={:2}, trt_cnt={:4}, fx_rate={:6}".format(
@@ -217,7 +214,7 @@ class Human(object):
                 self.record.ost_sick_trt = take_ost_trt()
                 if self.record.ost_sick_trt:
                     trt_sop = True
-                elif self.record.ost_result == 'lbm':
+                elif self.record.ost_result == 'lbm' and DO_VFA:
                     self.record.vfa_result = get_vfa_test_result(self.vfa)
                     if self.record.vfa_result:
                         self.record.vfa_trt = True
@@ -234,12 +231,12 @@ class Human(object):
 
 
 
-    def get_status_str(self):
+    def get_status_str(self, threshold):
         if self.trt_len > EFF_DELAY:
             self.trt_eff = True
         else:
             self.trt_eff = False
-        return to_status_str(self.ost, self.vfa, self.trt_eff)
+        return to_status_str(self.ost, self.vfa, self.trt_eff, threshold)
 
     def add_cost(self):
         if self.record.ost_result is not None:
@@ -260,16 +257,12 @@ class Human(object):
     def add_utils(self):
         self.record.inc_utils += get_utility(self.fx,self.age)
 
-
-
-
-
-    def state_transition(self, prt=False):
+    def state_transition(self):
         ret = None
         natual_rate = natual_death_rate(self.age)
         prob_death = self.fx_death_rate()
         self.old_fx = self.fx
-        status_str = self.get_status_str()
+        status_str = self.get_status_str(THRESHOLD)
         vector = PROB_TABLE[status_str][self.old_fx]
         prob_hip = vector['hip']
         prob_vf = vector['vf']
@@ -290,22 +283,18 @@ class Human(object):
             self.record.inc_cost += self.er_cost() + nursing_cost()
 
 
-        if prt:
-            ret = "{:15s}, old_fx={:5s},natural_death={:8f},no_fx={:8f},hip={:8f},vf={:8f},wf={:8f},fx_death={:8f}, new_fx={:5s}".format(self.get_status_str(), self.old_fx, natual_rate,prob_no_fix,prob_hip,prob_vf,prob_wf,prob_death, self.fx)
-        # #TODO delete
-        # print self.fx
         return ret
 
 
 
 
-    def next_cycle(self,prt=False):
+    def next_cycle(self):
         if self.fx!='death':
             self.ost, self.vfa = set_ost_vfa(self.age, self.ost, self.vfa)
             #self.lab_test()
             self.add_cost()
             self.add_utils()
-            trans_prt=self.state_transition(prt)
+            trans_prt=self.state_transition()
             if self.fx == 'hip':
                 self.last_hip = self.age
             elif self.fx == 'vf':
@@ -323,11 +312,9 @@ class Human(object):
         self.age += 0.5
         return trans_prt
 
-    def do_life(self, prt=False):
+    def do_life(self):
         while self.age < 100:
-            cycle_prt=self.next_cycle(prt)
-            if prt:
-                print "{:290s}, ___ {}".format(self.__str__(), cycle_prt)
+            self.next_cycle()
             if self.fx == 'death':
                 break
 
@@ -401,11 +388,7 @@ class Human(object):
 
 
 if __name__ == '__main__':
-    from collections import Counter
-    c = Counter()
-    for _ in xrange(10000):
-        h = Human(65)
-        c[h.ost] += 1
-    print c
+    h = Human(65, strategy=1)
+    h.do_life()
 
 
