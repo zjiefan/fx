@@ -4,7 +4,7 @@ import logging
 import random
 import numpy as np
 from collections import Counter
-from prob_table import PROB_TABLE, set_ost_vfa, natual_death_rate, get_ost_test_result, get_vfa_test_result, take_ost_trt
+from prob_table import PROB_TABLE, natual_death_rate, get_ost_test_result, get_vfa_test_result, take_ost_trt
 from cost_table import drug_cost, ost_cost, vfa_cost, nursing_cost
 from human_stats import Record, HumanStats
 
@@ -17,17 +17,53 @@ DISCOUNT_RATE = 0.03
 DISCOUNT = 1-DISCOUNT_RATE/2
 EFF_DELAY = 2
 
-THRESHOLD = int(os.environ['OST_THRESHOLD'])
-DO_VFA = int(os.environ['DO_VFA'])
+
+VFA_OST_NORMAL = 0.085
+VFA_OST_LBL = 0.1
+VFA_OST_LBM1 = 0.157
+VFA_OST_SICK = 0.343
+
+
+VFA_PREVAL = {}
+VFA_PREVAL[50] = 0.017
+VFA_PREVAL[60] = 0.0386
+VFA_PREVAL[70] = 0.0647
+VFA_PREVAL_60 = (VFA_PREVAL[60] - VFA_PREVAL[50])/(1-VFA_PREVAL[50])
+VFA_PREVAL_70 = (VFA_PREVAL[70] - VFA_PREVAL[60])/(1-VFA_PREVAL[60])
+
+OST_SICK_PREVAL = {}
+OST_SICK_PREVAL[60] = 0.123
+OST_SICK_PREVAL[70] = 0.257
+OST_SICK_PREVAL[80] = 0.349
+
+
+OST_LBM1_PREVAL = {}
+OST_LBM1_PREVAL[60] = 0.454
+OST_LBM1_PREVAL[70] = 0.440
+OST_LBM1_PREVAL[80] = 0.448
+
+OST_LBM2_PREVAL = {}
+OST_LBM2_PREVAL[60] = 0.534
+OST_LBM2_PREVAL[70] = 0.518
+OST_LBM2_PREVAL[80] = 0.527
+
+OST_LBL_PREVAL = {}
+OST_LBL_PREVAL[60] = OST_LBM2_PREVAL[60] - OST_LBM1_PREVAL[60]
+OST_LBL_PREVAL[70] = OST_LBM2_PREVAL[70] - OST_LBM1_PREVAL[70]
+OST_LBL_PREVAL[80] = OST_LBM2_PREVAL[80] - OST_LBM1_PREVAL[80]
+
+OST_NORMAL_PREVAL = {}
+OST_NORMAL_PREVAL[60] = 1 - OST_LBM2_PREVAL[60] - OST_SICK_PREVAL[60]
+OST_NORMAL_PREVAL[70] = 1 - OST_LBM2_PREVAL[70] - OST_SICK_PREVAL[70]
+OST_NORMAL_PREVAL[80] = 1 - OST_LBM2_PREVAL[80] - OST_SICK_PREVAL[80]
+
 
 
 def to_status_str(ost, vfa, trt, threshold):
     if vfa:
         s0 = 'vfa'
-    elif ost == 'lbm':
-        s0 = 'lbm'+ str(threshold)
     else:
-        s0 == ost
+        s0 = ost
     s1 = 'trt' if trt else 'no_trt'
     return (s0, s1)
 
@@ -84,6 +120,9 @@ class Human(object):
     'stats'
 
     )
+    threshold = None
+    do_vfa = None
+    log = logging.getLogger("Human")
     def __init__(self, base_age=None, test_freq=5, strategy=None):
         self.test_freq = test_freq
         self.strategy = strategy
@@ -95,7 +134,7 @@ class Human(object):
         self.next_test = None
         self.ost = None
         self.vfa = None
-        self.ost, self.vfa = set_ost_vfa(self.age, self.ost, self.vfa)
+        self.set_ost_vfa()
         self.fx = 'no_fx'
         self.trt = False
         self.trt_len = 0
@@ -120,6 +159,125 @@ class Human(object):
                 header, str(self.trt),self.trt_len, str(self.trt_eff), self.drug_holiday_end, self.ost_result, self.vfa_result, self.hip_cnt, self.vf_cnt, self.wf_cnt, self.trt_cnt, self.fx_rate)
         else:
             return header
+
+
+
+
+
+    def set_ost_vfa(self):
+        if self.ost is None:
+            p = random.random()
+            pv = random.random()
+            if self.age < 70:
+                band = 60
+            elif self.age < 80:
+                band = 70
+            else:
+                band = 80
+            if p < OST_SICK_PREVAL[band]:
+                self.ost = 'sick'
+                self.vfa = pv < VFA_OST_SICK
+                self.log.debug("initial ost %s, vfa %s", self.ost, self.vfa)
+                return
+            elif p < OST_SICK_PREVAL[band] + OST_LBM1_PREVAL[band]:
+                self.ost = 'lbm1'
+                self.vfa = pv < VFA_OST_LBM1
+                self.log.debug("initial ost %s, vfa %s", self.ost, self.vfa)
+                return
+            elif p < OST_SICK_PREVAL[band] + OST_LBM2_PREVAL[band]:
+                self.ost = 'lbl'
+                self.vfa = pv < VFA_OST_LBL
+                self.log.debug("initial ost %s, vfa %s", self.ost, self.vfa)
+                return
+            else:
+                self.ost = 'normal'
+                self.vfa = pv < VFA_OST_NORMAL
+                self.log.debug("initial ost %s, vfa %s", self.ost, self.vfa)
+                return
+
+        else:
+            if self.age in [70, 80]:
+                if self.ost == 'sick': # cannot get worst
+                    return
+                sick_inc = (OST_SICK_PREVAL[self.age]-OST_SICK_PREVAL[self.age-10])
+                last_lbm1_preval = OST_LBM1_PREVAL[self.age-10]
+                self.log.debug("at age %d, sick prob increase %.5f, last lbm1 preval is %.5f", self.age, sick_inc, last_lbm1_preval)
+                if sick_inc <= 0:
+                    raise Exception("sick prevail reduced")
+                if OST_LBM1_PREVAL[self.age-10] < sick_inc:
+                    raise Exception("not enough lbm1")
+                if self.ost == 'lbm1':
+                    ost_lbm1_to_sick = sick_inc/last_lbm1_preval
+                    p = random.random()
+                    self.log.debug("prob that lbm1 turn sick at %d is %.5f, get prob %.5f", self.age, ost_lbm1_to_sick, p)
+                    if p < ost_lbm1_to_sick:
+                        self.log.debug("turn lbm1 to sick")
+                        self.ost = 'sick'
+                        # ost changes from lbm1 to sick, patients are more likely to have vfa.
+                        if not self.vfa:
+                            p = random.random()
+                            vfa_inc = (VFA_OST_SICK - VFA_OST_LBM1)/(1-VFA_OST_LBM1)
+                            self.log.debug("current vfa is false, prob to turn True is %.5f, get prob %.5f", vfa_inc, p)
+                            self.vfa = p < vfa_inc
+                    self.log.debug("return new ost %s, vfa %s", self.ost, self.vfa)
+                    return
+
+                old_lbm1_preval = OST_LBM1_PREVAL[self.age-10]
+                lbm1_leftover = old_lbm1_preval - sick_inc
+                self.log.debug("at age %d, lbm1 prevail was %.5f, sick takes %.5f, lbm preval leftover %.5f", self.age,  old_lbm1_preval, sick_inc, lbm1_leftover)
+                lbm1_preval = OST_LBM1_PREVAL[self.age]
+                lbm1_needed = lbm1_preval - lbm1_leftover
+                self.log.debug("at age %d, lbm1 preval is %.5f, lbm leftover is %.5f, lbm1 need to add %.5f", self.age, lbm1_preval, lbm1_leftover, lbm1_needed)
+                if lbm1_needed < 0:
+                    raise Exception("lbm1 refill is negative")
+                # all lbl convert to lbm1
+                old_lbl_preval = OST_LBL_PREVAL[self.age-10]
+                lbm1_needed_from_normal = lbm1_needed - old_lbl_preval
+                self.log.debug("at age %d, lbm1 needed %.5f, lbl has %.5f, lbm1 need %.5f from normal", self.age, lbm1_needed, old_lbl_preval, lbm1_needed_from_normal)
+                if lbm1_needed_from_normal < 0:
+                    raise Exception("ERROR: expected all lml convert to lbm1")
+                if self.ost == 'lbl':
+                    self.log.debug("ost was lml, convert to lbm1")
+                    self.ost = 'lbm1'
+                    if not self.vfa:
+                        vfa_inc = (VFA_OST_LBM1 - VFA_OST_LBL)/(1-VFA_OST_LBL)
+                        pv = random.random()
+                        self.log.debug("current vfa is false, prob to turn True is %.5f, get prob %.5f", vfa_inc, pv)
+                        self.vfa = pv < vfa_inc
+                    self.log.debug("return new ost %s, vfa %s", self.ost, self.vfa)
+                    return
+                if self.ost != 'normal':
+                    self.log.error("ost %s, vfa %s", self.ost, self.vfa)
+                    raise Exception("leftover has to be ost normal")
+                self.log.debug("at age %d, lbm1 need %.5f from normal", self.age, lbm1_needed_from_normal)
+                lbl_needed_from_normal = OST_NORMAL_PREVAL[self.age]
+                old_normal_preval = OST_NORMAL_PREVAL[self.age-10]
+                ost_normal_to_lbm1 = lbm1_needed_from_normal/old_normal_preval
+                ost_normal_to_lbl = lbl_needed_from_normal/old_normal_preval
+                self.log.debug("at age %d, old normal preval is %.5f, lbm1 takes %.5f, or prob %.5f, lbl takes %.5f, or prob %.5f",
+                self.age, old_normal_preval, lbm1_needed_from_normal, ost_normal_to_lbm1, lbl_needed_from_normal, ost_normal_to_lbl)
+                p = random.random()
+                self.log.debug("get prob %.5f", p)
+                if p < ost_normal_to_lbm1:
+                    self.log.debug("promote ost to lbm1")
+                    self.ost = 'lbm1'
+                    if not self.vfa:
+                        pv = random.random()
+                        vfa_inc = (VFA_OST_LBM1 - VFA_OST_NORMAL)/(1-VFA_OST_NORMAL)
+                        self.log.debug("current vfa is false, prob to turn True is %.5f, get prob %.5f", vfa_inc, pv)
+                        self.vfa = pv < vfa_inc
+                    self.log.debug("return new ost %s, vfa %s", self.ost, self.vfa)
+                    return
+                elif p < ost_normal_to_lbm1 + ost_normal_to_lbl:
+                    self.ost = 'lbl'
+                    if not self.vfa:
+                        pv = random.random()
+                        vfa_inc = (VFA_OST_LBL - VFA_OST_NORMAL)/(1-VFA_OST_NORMAL)
+                        self.log.debug("current vfa is false, prob to turn True is %.5f, get prob %.5f", vfa_inc, pv)
+                        self.vfa = pv < vfa_inc
+                    self.log.debug("return new ost %s, vfa %s", self.ost, self.vfa)
+                    return
+                self.log.debug("at age %d, final return new ost %s, vfa %s", self.age, self.ost, self.vfa)
 
 
 
@@ -214,7 +372,7 @@ class Human(object):
                 self.record.ost_sick_trt = take_ost_trt()
                 if self.record.ost_sick_trt:
                     trt_sop = True
-                elif self.record.ost_result == 'lbm' and DO_VFA:
+                elif self.record.ost_result == 'lbm' and self.do_vfa:
                     self.record.vfa_result = get_vfa_test_result(self.vfa)
                     if self.record.vfa_result:
                         self.record.vfa_trt = True
@@ -262,7 +420,7 @@ class Human(object):
         natual_rate = natual_death_rate(self.age)
         prob_death = self.fx_death_rate()
         self.old_fx = self.fx
-        status_str = self.get_status_str(THRESHOLD)
+        status_str = self.get_status_str(self.threshold)
         vector = PROB_TABLE[status_str][self.old_fx]
         prob_hip = vector['hip']
         prob_vf = vector['vf']
@@ -290,7 +448,7 @@ class Human(object):
 
     def next_cycle(self):
         if self.fx!='death':
-            self.ost, self.vfa = set_ost_vfa(self.age, self.ost, self.vfa)
+            self.set_ost_vfa()
             #self.lab_test()
             self.add_cost()
             self.add_utils()
@@ -306,7 +464,7 @@ class Human(object):
             self.stats.total_utils = self.record.inc_utils * self.discount
             self.discount *= DISCOUNT
 
-            self.records[self.age*2] = self.record
+            self.records[int(self.age*2)] = self.record
             self.record = Record()
 
         self.age += 0.5
@@ -388,6 +546,19 @@ class Human(object):
 
 
 if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--threshold', type=int, choices=[1, 2])
+    parser.add_argument('--do_vfa', action="store_true")
+    parser.add_argument("--log_level", type=str, choices=['debug'])
+    args = parser.parse_args()
+    if args.log_level == 'debug':
+        print("set debug logger")
+        logging.basicConfig(level=logging.DEBUG)
+        Human.log.setLevel(logging.DEBUG)
+    Human.threshold = args.threshold
+    Human.do_vfa = args.do_vfa
     h = Human(65, strategy=1)
     h.do_life()
 
