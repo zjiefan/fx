@@ -59,7 +59,7 @@ OST_NORMAL_PREVAL[80] = 1 - OST_LBM2_PREVAL[80] - OST_SICK_PREVAL[80]
 
 
 
-def to_status_str(ost, vfa, trt, threshold):
+def to_status_str(ost, vfa, trt):
     if vfa:
         s0 = 'vfa'
     else:
@@ -120,12 +120,10 @@ class Human(object):
     'stats'
 
     )
-    threshold = None
-    do_vfa = None
+    strategy = None
     log = logging.getLogger("Human")
-    def __init__(self, base_age=None, test_freq=5, strategy=None):
+    def __init__(self, base_age=None, test_freq=5):
         self.test_freq = test_freq
-        self.strategy = strategy
         self.record = Record()
         self.records = [None]*200
         self.stats = HumanStats()
@@ -152,7 +150,7 @@ class Human(object):
         ost = 'ost' if self.ost else 'no_ost'
         vfa = 'vfa' if self.ost else 'no_vfa'
         header = "age={:5},next_test={:5}, drug_end={:6}, last_hip={:4}, last_vf={:4}, last_wf={:4}, <inc_utils={:8.3f} acc_utils={:8.3f} | inc_cost={:12.3f} acc_cost={:12.3f}> |{:6}, {:6}| fx={:6}".format(
-                self.age, self.next_test, self.drug_end, self.last_hip, self.last_vf, self.last_wf, self.stats.inc_utils, self.stats.total_utils, self.inc_cost, self.acc_cost, ost, vfa, self.fx)
+                self.age, self.next_test, self.drug_end, self.last_hip, self.last_vf, self.last_wf, self.record.inc_utils, self.stats.total_utils, self.inc_cost, self.acc_cost, ost, vfa, self.fx)
 
         if self.fx != 'death':
             return "{}   trt={:6},len={:2},eff={:6}, holiday_end={:5} ost_result={:6}, vfa_result={:6}, hip_cnt={:2}, vf_cnt={:2}, wf_cnt={:2}, trt_cnt={:4}, fx_rate={:6}".format(
@@ -233,11 +231,11 @@ class Human(object):
                 # all lbl convert to lbm1
                 old_lbl_preval = OST_LBL_PREVAL[self.age-10]
                 lbm1_needed_from_normal = lbm1_needed - old_lbl_preval
-                self.log.debug("at age %d, lbm1 needed %.5f, lbl has %.5f, lbm1 need %.5f from normal", self.age, lbm1_needed, old_lbl_preval, lbm1_needed_from_normal)
+                self.log.debug("at age %d, lbm1 needed add %.5f, lbl has only %.5f, so lbm1 need %.5f from normal", self.age, lbm1_needed, old_lbl_preval, lbm1_needed_from_normal)
                 if lbm1_needed_from_normal < 0:
                     raise Exception("ERROR: expected all lml convert to lbm1")
                 if self.ost == 'lbl':
-                    self.log.debug("ost was lml, convert to lbm1")
+                    self.log.debug("ost was lbl, convert to lbm1")
                     self.ost = 'lbm1'
                     if not self.vfa:
                         vfa_inc = (VFA_OST_LBM1 - VFA_OST_LBL)/(1-VFA_OST_LBL)
@@ -348,7 +346,7 @@ class Human(object):
                 raise Exception("unknown fx")
 
 
-    def lab_test(self, threshold):
+    def lab_test(self):
         trt_sop = False
         if self.fx != 'no_fx':
             trt_sop = True
@@ -365,18 +363,30 @@ class Human(object):
 
         self.record = Record()
         if do_test and not trt_sop:
-            if threshold == 0:
+            if self.strategy == 0:
                 pass
-            self.record.ost_result = get_ost_test_result(self.ost, threshold)
-            if self.record.ost_result == 'sick':
-                self.record.ost_sick_trt = take_ost_trt()
-                if self.record.ost_sick_trt:
-                    trt_sop = True
-                elif self.record.ost_result == 'lbm' and self.do_vfa:
-                    self.record.vfa_result = get_vfa_test_result(self.vfa)
-                    if self.record.vfa_result:
-                        self.record.vfa_trt = True
-                        trt_sop = True
+            else:
+    #            self.record.ost_result = get_ost_test_result(self.ost, self.threshold)
+                self.record.ost_result = self.ost
+                if self.record.ost_result == 'sick':
+                    trt_sop = take_ost_trt()
+                if self.strategy == 1:
+                    pass
+                else:
+                    if not trt_sop:
+                        if self.strategy == 2:
+                            if self.record.ost_result in ['lbm1']:
+                                self.record.vfa_result = get_vfa_test_result(self.vfa)
+                                if self.record.vfa_result:
+                                    trt_sop = True
+                        elif self.strategy == 3:
+                            if self.record.ost_result in ['lbm1', 'lbl']:
+                                self.record.vfa_result = get_vfa_test_result(self.vfa)
+                                if self.record.vfa_result:
+                                    trt_sop = True
+                        else:
+                            self.log.error("unexpected strategy %d", self.strategy)
+                            raise Exception("unknown strategy")
 
         if trt_sop:
             self.drug_end = max(self.drug_end, self.age + DRUG_PERIOD)
@@ -389,12 +399,12 @@ class Human(object):
 
 
 
-    def get_status_str(self, threshold):
+    def get_status_str(self):
         if self.trt_len > EFF_DELAY:
             self.trt_eff = True
         else:
             self.trt_eff = False
-        return to_status_str(self.ost, self.vfa, self.trt_eff, threshold)
+        return to_status_str(self.ost, self.vfa, self.trt_eff)
 
     def add_cost(self):
         if self.record.ost_result is not None:
@@ -420,7 +430,7 @@ class Human(object):
         natual_rate = natual_death_rate(self.age)
         prob_death = self.fx_death_rate()
         self.old_fx = self.fx
-        status_str = self.get_status_str(self.threshold)
+        status_str = self.get_status_str()
         vector = PROB_TABLE[status_str][self.old_fx]
         prob_hip = vector['hip']
         prob_vf = vector['vf']
@@ -449,7 +459,7 @@ class Human(object):
     def next_cycle(self):
         if self.fx!='death':
             self.set_ost_vfa()
-            #self.lab_test()
+            self.lab_test()
             self.add_cost()
             self.add_utils()
             trans_prt=self.state_transition()
@@ -549,17 +559,15 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--threshold', type=int, choices=[1, 2])
-    parser.add_argument('--do_vfa', action="store_true")
+    parser.add_argument('--strategy', type=int, choices=[0, 1, 2, 3])
     parser.add_argument("--log_level", type=str, choices=['debug'])
     args = parser.parse_args()
     if args.log_level == 'debug':
         print("set debug logger")
         logging.basicConfig(level=logging.DEBUG)
         Human.log.setLevel(logging.DEBUG)
-    Human.threshold = args.threshold
-    Human.do_vfa = args.do_vfa
-    h = Human(65, strategy=1)
+    Human.strategy = args.strategy
+    h = Human(65)
     h.do_life()
 
 
