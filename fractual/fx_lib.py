@@ -481,10 +481,10 @@ class Human(object):
                 self.last_vf = self.age
             elif self.fx == 'wf':
                 self.last_wf = self.age
-            self.log.info("%s, %s, %s", self.record, str(self), self.stats)
             self.stats.total_cost += self.record.inc_cost *self.discount
             self.stats.total_utils = self.record.inc_utils * self.discount
             self.discount *= DISCOUNT
+            self.log.info("%s, %s, %s", self.record, str(self), self.stats)
 
             self.records[int(self.age*2)] = self.record
             self.record = Record()
