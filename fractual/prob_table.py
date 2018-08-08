@@ -166,7 +166,7 @@ def joint_vfa_to_trama(age):
 
 
 
-def natual_death_rate(age):
+def get_natual_death_rate(age):
     #TODO: remove this
     #return 0
     if age < 60:
