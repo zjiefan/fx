@@ -369,24 +369,21 @@ class Human(object):
     #            self.record.ost_result = get_ost_test_result(self.ost, self.threshold)
                 self.record.ost_result = self.ost
                 if self.record.ost_result == 'sick':
-                    trt_sop = take_ost_trt()
+                    self.record.sick_trt_sop = take_ost_trt()
                 if self.strategy == 1:
                     pass
                 else:
-                    if not trt_sop:
-                        if self.strategy == 2:
-                            if self.record.ost_result in ['lbm1']:
-                                self.record.vfa_result = get_vfa_test_result(self.vfa)
-                                if self.record.vfa_result:
-                                    trt_sop = True
-                        elif self.strategy == 3:
-                            if self.record.ost_result in ['lbm1', 'lbl']:
-                                self.record.vfa_result = get_vfa_test_result(self.vfa)
-                                if self.record.vfa_result:
-                                    trt_sop = True
-                        else:
-                            self.log.error("unexpected strategy %d", self.strategy)
-                            raise Exception("unknown strategy")
+                    if self.strategy == 2:
+                        lbm_types = ('lbm1')
+                    elif self.strategy == 3:
+                        lbm_types = ('lbm1', 'lbl')
+                    else:
+                        self.log.error("unexpected strategy %d", self.strategy)
+                        raise Exception("unknown strategy")
+                    if self.record.sick_trt_sop == False or self.record.ost_result in lbm_types:
+                        self.record.vfa_result = get_vfa_test_result(self.vfa)
+                        if self.record.vfa_result == 'Pos':
+                                self.record.vfa_trt_sop = True
 
         if trt_sop:
             self.drug_end = max(self.drug_end, self.age + DRUG_PERIOD)
@@ -460,8 +457,11 @@ class Human(object):
         if self.fx!='death':
             self.set_ost_vfa()
             self.lab_test()
+            self.log.debug("%s", self.record)
+            return
             self.add_cost()
             self.add_utils()
+
             trans_prt=self.state_transition()
             if self.fx == 'hip':
                 self.last_hip = self.age
@@ -483,6 +483,7 @@ class Human(object):
     def do_life(self):
         while self.age < 100:
             self.next_cycle()
+            break
             if self.fx == 'death':
                 break
 
