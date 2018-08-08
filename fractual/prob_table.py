@@ -249,8 +249,10 @@ def get_ost_test_result(ost, threshold):
 
 def take_ost_trt():
     p = random.random()
-    if p <= 0.25:
-        return p
+    if p < 0.25:
+        return True
+    else:
+        return False
 
 
 VFA_SENSI = 0.85

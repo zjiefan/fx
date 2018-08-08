@@ -347,11 +347,8 @@ class Human(object):
 
 
     def lab_test(self):
-        trt_sop = False
         if self.fx != 'no_fx':
-            trt_sop = True
-        self.record.ost_result = None
-        self.record.vfa_result = None
+            self.record.vf_trt_sop = True
 
         do_test = False
         if self.next_test is None:
@@ -361,35 +358,37 @@ class Human(object):
             do_test = True
             self.next_test = self.age + self.test_freq
 
+        if self.record.vf_trt_sop:
+            do_test = False
+        if self.age < self.drug_end:
+            do_test = False
+
+
         self.record = Record()
-        if do_test and not trt_sop:
-            if self.strategy == 0:
+        if do_test and self.strategy:
+            self.record.ost_result = self.ost
+            if self.record.ost_result == 'sick':
+                self.record.sick_trt_sop = take_ost_trt()
+            if self.strategy == 1:
                 pass
             else:
-    #            self.record.ost_result = get_ost_test_result(self.ost, self.threshold)
-                self.record.ost_result = self.ost
-                if self.record.ost_result == 'sick':
-                    self.record.sick_trt_sop = take_ost_trt()
-                if self.strategy == 1:
-                    pass
+                if self.strategy == 2:
+                    lbm_types = ('lbm1')
+                elif self.strategy == 3:
+                    lbm_types = ('lbm1', 'lbl')
                 else:
-                    if self.strategy == 2:
-                        lbm_types = ('lbm1')
-                    elif self.strategy == 3:
-                        lbm_types = ('lbm1', 'lbl')
-                    else:
-                        self.log.error("unexpected strategy %d", self.strategy)
-                        raise Exception("unknown strategy")
-                    if self.record.sick_trt_sop == False or self.record.ost_result in lbm_types:
-                        self.record.vfa_result = get_vfa_test_result(self.vfa)
-                        if self.record.vfa_result == 'Pos':
-                                self.record.vfa_trt_sop = True
+                    self.log.error("unexpected strategy %d", self.strategy)
+                    raise Exception("unknown strategy")
+                if self.record.sick_trt_sop == False or self.record.ost_result in lbm_types:
+                    self.record.vfa_result = get_vfa_test_result(self.vfa)
+                    if self.record.vfa_result == 'Pos':
+                            self.record.vfa_trt_sop = True
 
-        if trt_sop:
+        if self.record.vf_trt_sop or self.record.sick_trt_sop or self.record.vfa_trt_sop:
             self.drug_end = max(self.drug_end, self.age + DRUG_PERIOD)
 
-        self.trt = self.age < self.drug_end
-        if self.trt:
+        self.record.trt = self.age < self.drug_end
+        if self.record.trt:
             self.trt_len += 1
         else:
             self.trt_len = 0
@@ -428,6 +427,7 @@ class Human(object):
         prob_death = self.fx_death_rate()
         self.old_fx = self.fx
         status_str = self.get_status_str()
+        self.log.debug("at age %.1f, status str is %s", self.age, status_str)
         vector = PROB_TABLE[status_str][self.old_fx]
         prob_hip = vector['hip']
         prob_vf = vector['vf']
@@ -457,12 +457,11 @@ class Human(object):
         if self.fx!='death':
             self.set_ost_vfa()
             self.lab_test()
-            self.log.debug("%s", self.record)
-            return
             self.add_cost()
             self.add_utils()
-
-            trans_prt=self.state_transition()
+            self.state_transition()
+            self.log.info("%s", self.record)
+            return
             if self.fx == 'hip':
                 self.last_hip = self.age
             elif self.fx == 'vf':
@@ -478,7 +477,7 @@ class Human(object):
             self.record = Record()
 
         self.age += 0.5
-        return trans_prt
+        return
 
     def do_life(self):
         while self.age < 100:
