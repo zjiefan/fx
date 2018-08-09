@@ -111,31 +111,55 @@ def get_utility(fx, age):
 
 
 class Human(object):
-    __slots__ = ('test_freq', 'strategy', 'record', 'records',
+    __slots__ = (
     'age', 'next_test', 'ost', 'vfa','fx', #'trt',
     'drug_end', 'drug_holiday_end',
     'last_hip', 'last_vf', 'last_wf', 'fx_rate',
     'old_fx', 'trt_len', 'trt_eff',
     'discount',
-    'stats'
+
+    'ost_result', 'vfa_result',
+    'vf_trt_sop', 'sick_trt_sop', 'vfa_trt_sop',
+    'trt',
+    'inc_cost', 'inc_utils',
+
+    'total_utils', 'total_cost', 'final_age',
+    'vf_cnt', 'hip_cnt', 'wf_cnt', 'trt_cnt',
+    'prob_vector'
 
     )
 
-    meta_slots = (
+    print_slots = (
+        ('age', '5.1f'),
         ('ost', '6s'),
         ('vfa', '5s'),
-        ('drug_end', '5.1f'),
+        ('ost_result','6s'),
+        ('vfa_result','6s'),
+
         ('fx', '6s'),
+        ('last_hip', '5.1f'),
+        ('last_vf', '5.1f'),
+        ('last_wf', '5.1f'),
+        ('vf_trt_sop','5s'),
+        ('sick_trt_sop','5s'),
+        ('vfa_trt_sop','5s'),
+        ('drug_end', '5.1f'),
+        ('trt', '5s'),
+        ('inc_cost', '8.1f'),
+        ('inc_utils', '6.1f'),
+        ('total_cost','8.1f'),
+        ('total_utils','8.4f'),
+        ('trt_len', '4.1f'),
+        ('drug_holiday_end', '5.1f'),
+        ('trt_eff', '5s'),
+        ('prob_vector', 's')
+
 
         )
+    test_freq = 5
     strategy = None
     log = logging.getLogger("Human")
-    def __init__(self, base_age=None, test_freq=5):
-        self.test_freq = test_freq
-        self.record = Record()
-        self.records = [None]*200
-        self.stats = HumanStats()
-
+    def __init__(self, base_age=None):
         self.age = base_age
         self.next_test = None
         self.ost = None
@@ -154,17 +178,38 @@ class Human(object):
         self.last_wf = 0
         self.discount = 1
 
+        self.ost_result = None
+        self.vfa_result = None
+        self.vf_trt_sop = None
+        self.sick_trt_sop = None
+        self.vfa_trt_sop = None
+        self.trt = None
+        self.inc_cost = 0
+        self.inc_utils = 0
+
+        self.vf_cnt = 0
+        self.hip_cnt = 0
+        self.wf_cnt = 0
+        self.trt_cnt = 0
+        self.total_cost = 0
+        self.total_utils = 0
+
+
     def __str__(self):
         ret = []
-        for slot, fmt in self.meta_slots:
+        for slot, fmt in self.print_slots:
             value = getattr(self, slot)
             fmt_str = "{}={:" + fmt + "}"
             if value is None:
                 value =""
+            if value == 0:
+                fmt = fmt[0] + 's'
+                value = ""
+            fmt_str = "{}={:" + fmt + "}"
             if isinstance(value, bool):
                 value = str(value)
             ret.append(fmt_str.format(slot, value))
-        return ','.join(ret)
+        return '  '.join(ret)
 
 
 
@@ -316,7 +361,7 @@ class Human(object):
             return 0
 
     def er_cost(self):
-        if self.stats.hip_cnt + self.stats.vf_cnt + self.stats.wf_cnt == 0:
+        if self.hip_cnt + self.vf_cnt + self.wf_cnt == 0:
             if self.fx=='hip':
                 if self.age < 65:
                     return 28496 + 180
@@ -335,17 +380,17 @@ class Human(object):
             else:
                 raise Exception("unknown fx")
         else:
-            if self.stats.hip_cnt >= 1:
+            if self.hip_cnt >= 1:
                 if self.age < 65:
                     return 90855
                 else:
                     return 42991
-            elif self.stats.vf_cnt >= 1:
+            elif self.vf_cnt >= 1:
                 if self.age < 65:
                     return 84933
                 else:
                     return 44526
-            elif self.stats.wf_cnt >=1:
+            elif self.wf_cnt >=1:
                 if self.age < 65:
                     return 52732
                 else:
@@ -356,7 +401,7 @@ class Human(object):
 
     def lab_test(self):
         if self.fx != 'no_fx':
-            self.record.vf_trt_sop = True
+            self.vf_trt_sop = True
 
         do_test = False
         if self.next_test is None:
@@ -366,17 +411,16 @@ class Human(object):
             do_test = True
             self.next_test = self.age + self.test_freq
 
-        if self.record.vf_trt_sop:
+        if self.vf_trt_sop:
             do_test = False
         if self.age < self.drug_end:
             do_test = False
 
 
-        self.record = Record()
         if do_test and self.strategy:
-            self.record.ost_result = self.ost
-            if self.record.ost_result == 'sick':
-                self.record.sick_trt_sop = take_ost_trt()
+            self.ost_result = self.ost
+            if self.ost_result == 'sick':
+                self.sick_trt_sop = take_ost_trt()
             if self.strategy == 1:
                 pass
             else:
@@ -387,60 +431,63 @@ class Human(object):
                 else:
                     self.log.error("unexpected strategy %d", self.strategy)
                     raise Exception("unknown strategy")
-                if self.record.sick_trt_sop == False or self.record.ost_result in lbm_types:
-                    self.record.vfa_result = get_vfa_test_result(self.vfa)
-                    if self.record.vfa_result == 'Pos':
-                            self.record.vfa_trt_sop = True
+                if self.sick_trt_sop == False or self.ost_result in lbm_types:
+                    self.vfa_result = get_vfa_test_result(self.vfa)
+                    if self.vfa_result == 'Pos':
+                            self.vfa_trt_sop = True
 
-        if self.record.vf_trt_sop or self.record.sick_trt_sop or self.record.vfa_trt_sop:
+        if self.vf_trt_sop or self.sick_trt_sop or self.vfa_trt_sop:
             self.drug_end = max(self.drug_end, self.age + DRUG_PERIOD)
 
         if self.age < self.drug_end:
-            self.record.trt = True
-        if self.record.trt:
+            self.trt = True
+        if self.trt:
             self.trt_len += 1
         else:
             self.trt_len = 0
 
+        if self.trt_len > EFF_DELAY:
+            self.drug_holiday_end = self.age + 5
+        if self.age <= self.drug_holiday_end:
+            self.trt_eff = True
+        else:
+            self.trt_eff = None
+
 
 
     def get_status_str(self):
-        if self.trt_len > EFF_DELAY:
-            self.trt_eff = True
-        else:
-            self.trt_eff = False
         return to_status_str(self.ost, self.vfa, self.trt_eff)
 
     def add_cost(self):
-        if self.record.ost_result is not None:
-            self.record.inc_cost += ost_cost()
-        if self.record.vfa_result is not None:
-            self.record.inc_cost += vfa_cost()
-        if self.record.trt:
-            self.record.inc_cost += drug_cost()
-            self.stats.trt_cnt += 1
+        if self.ost_result is not None:
+            self.inc_cost += ost_cost()
+        if self.vfa_result is not None:
+            self.inc_cost += vfa_cost()
+        if self.trt:
+            self.inc_cost += drug_cost()
+            self.trt_cnt += 1
 
         if self.fx not in ['no_fx', 'death']:
             # TODO: extra nursing
-            self.record.inc_cost += self.er_cost() + nursing_cost()
+            self.inc_cost += self.er_cost() + nursing_cost()
 
 
         if self.fx == 'vf':
-            self.stats.vf_cnt += 1
+            self.vf_cnt += 1
         elif self.fx == 'hip':
-            self.stats.hip_cnt += 1
+            self.hip_cnt += 1
         elif self.fx == 'wf':
-            self.stats.wf_cnt += 1
+            self.wf_cnt += 1
 
     def add_utils(self):
-        self.record.inc_utils += get_utility(self.fx,self.age)
+        self.inc_utils += get_utility(self.fx,self.age)
 
     def state_transition(self):
         ret = None
+        status_str = self.get_status_str()
         natual_death_rate = get_natual_death_rate(self.age)
         fx_death_rate = self.get_fx_death_rate()
         self.old_fx = self.fx
-        status_str = self.get_status_str()
         self.log.debug("at age %.1f, status str is %s", self.age, status_str)
         vector = PROB_TABLE[status_str][self.old_fx]
         prob_hip = vector['hip']
@@ -449,6 +496,7 @@ class Human(object):
         prob_no_fix = 1 - fx_death_rate - prob_hip - prob_vf - prob_wf
 
         self.log.debug("get trans prob no_fx %.5f, hip %.5f, vf %.5f, wf %.5f, natual_death_rate %.5f, fx_death_rate %.5f", prob_no_fix, prob_hip, prob_vf, prob_wf, natual_death_rate, fx_death_rate)
+        self.prob_vector = "(no=%6.3f%% h%6.3f%% v%6.3f%% w%6.3f%% n_death%6.3f%% f_death%6.3f%%)"%(prob_no_fix*100, prob_hip*100, prob_vf*100, prob_wf*100, natual_death_rate*100, fx_death_rate*100)
         nature_death = False
         if random.random() < natual_death_rate:
             nature_death = True
@@ -481,13 +529,19 @@ class Human(object):
                 self.last_vf = self.age
             elif self.fx == 'wf':
                 self.last_wf = self.age
-            self.stats.total_cost += self.record.inc_cost *self.discount
-            self.stats.total_utils = self.record.inc_utils * self.discount
-            self.discount *= DISCOUNT
-            self.log.info("%s, %s, %s", self.record, str(self), self.stats)
+            self.total_cost += self.inc_cost *self.discount
+            self.total_utils += self.inc_utils * self.discount
+            self.log.info("%s", self)
 
-            self.records[int(self.age*2)] = self.record
-            self.record = Record()
+            self.ost_result = None
+            self.vfa_result = None
+            self.vf_trt_sop = None
+            self.sick_trt_sop = None
+            self.vfa_trt_sop = None
+            self.trt = None
+            self.inc_cost = 0
+            self.inc_utils = 0
+
 
         self.age += 0.5
         return
