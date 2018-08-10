@@ -30,6 +30,25 @@ PROB_TABLE[('normal', 'no_trt')]['wf']['hip'] = 0.00257979
 PROB_TABLE[('normal', 'no_trt')]['wf']['vf']  = 0.00220672
 PROB_TABLE[('normal', 'no_trt')]['wf']['wf']  = 0.00175901
 
+PROB_TABLE[('normal', 'trt')] = {}
+PROB_TABLE[('normal', 'trt')]['no_fx'] = {}
+PROB_TABLE[('normal', 'trt')]['no_fx']['hip'] = 0.000308106
+PROB_TABLE[('normal', 'trt')]['no_fx']['vf']  = 0.00039213
+PROB_TABLE[('normal', 'trt')]['no_fx']['wf']  = 0.00005543
+PROB_TABLE[('normal', 'trt')]['hip'] = {}
+PROB_TABLE[('normal', 'trt')]['hip']['hip'] = 0.00345851
+PROB_TABLE[('normal', 'trt')]['hip']['vf']  = 0.00268938
+PROB_TABLE[('normal', 'trt')]['hip']['wf']  = 0.0022
+PROB_TABLE[('normal', 'trt')]['vf'] = {}
+PROB_TABLE[('normal', 'trt')]['vf']['hip'] = 0.001628317
+PROB_TABLE[('normal', 'trt')]['vf']['vf']  = 0.013892318
+PROB_TABLE[('normal', 'trt')]['vf']['wf']  = 0.004499502
+PROB_TABLE[('normal', 'trt')]['wf'] = {}
+PROB_TABLE[('normal', 'trt')]['wf']['hip'] = 0.001135108
+PROB_TABLE[('normal', 'trt')]['wf']['vf']  = 0.001235763
+PROB_TABLE[('normal', 'trt')]['wf']['wf']  = 0.001547929
+
+
 PROB_TABLE[('sick', 'no_trt')] = {}
 PROB_TABLE[('sick', 'no_trt')]['no_fx'] = {}
 PROB_TABLE[('sick', 'no_trt')]['no_fx']['hip'] = 0.00277684
@@ -85,8 +104,8 @@ for src in ['no_fx', 'hip', 'vf', 'wf']:
     for sink in ['hip', 'vf', 'wf']:
         PROB_TABLE[('lbm1', 'no_trt')][src][sink] = LBM1_NO_TRT_SCALE *(PROB_TABLE[('sick', 'no_trt')][src][sink] - PROB_TABLE[('normal', 'no_trt')][src][sink]) + PROB_TABLE[('normal', 'no_trt')][src][sink]
         PROB_TABLE[('lbl',  'no_trt')][src][sink] = LBL_NO_TRT_SCALE  *(PROB_TABLE[('sick', 'no_trt')][src][sink] - PROB_TABLE[('normal', 'no_trt')][src][sink]) + PROB_TABLE[('normal', 'no_trt')][src][sink]
-        PROB_TABLE[('lbm1',    'trt')][src][sink] = LBM1_NO_TRT_SCALE *(PROB_TABLE[('sick',    'trt')][src][sink] - PROB_TABLE[('normal', 'no_trt')][src][sink]) + PROB_TABLE[('normal', 'no_trt')][src][sink]
-        PROB_TABLE[('lbl',     'trt')][src][sink] = LBL_NO_TRT_SCALE  *(PROB_TABLE[('sick',    'trt')][src][sink] - PROB_TABLE[('normal', 'no_trt')][src][sink]) + PROB_TABLE[('normal', 'no_trt')][src][sink]
+        PROB_TABLE[('lbm1',    'trt')][src][sink] = LBM1_NO_TRT_SCALE *(PROB_TABLE[('sick',    'trt')][src][sink] - PROB_TABLE[('normal', 'trt')][src][sink]) + PROB_TABLE[('normal', 'trt')][src][sink]
+        PROB_TABLE[('lbl',     'trt')][src][sink] = LBL_NO_TRT_SCALE  *(PROB_TABLE[('sick',    'trt')][src][sink] - PROB_TABLE[('normal', 'trt')][src][sink]) + PROB_TABLE[('normal', 'trt')][src][sink]
 
 PROB_TABLE['vfa', 'no_trt'] = {}
 PROB_TABLE['vfa', 'no_trt']['no_fx'] = {}

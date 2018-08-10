@@ -3,6 +3,7 @@ import sys
 import logging
 import random
 import numpy as np
+import multiprocessing
 from collections import Counter
 from prob_table import PROB_TABLE, get_natual_death_rate, get_ost_test_result, get_vfa_test_result, take_ost_trt
 from cost_table import drug_cost, ost_cost, vfa_cost, nursing_cost
@@ -112,7 +113,8 @@ def get_utility(fx, age):
 
 class Human(object):
     __slots__ = (
-    'age', 'next_test', 'ost', 'vfa','fx', #'trt',
+    'test_freq', 'strategy',
+    'age', 'next_test', 'ost', 'vfa','fx',
     'drug_end', 'drug_holiday_end',
     'last_hip', 'last_vf', 'last_wf', 'fx_rate',
     'old_fx', 'trt_len', 'trt_eff',
@@ -159,10 +161,11 @@ class Human(object):
 
 
         )
-    test_freq = 5
-    strategy = None
     log = logging.getLogger("Human")
-    def __init__(self, base_age=None):
+    def __init__(self, base_age=None, test_freq=5, strategy=None):
+        self.test_freq = test_freq
+        self.strategy = strategy
+
         self.age = base_age
         self.next_test = None
         self.ost = None
@@ -556,44 +559,83 @@ class Human(object):
                 break
 
 
+class GroupResult(object):
+    __slots__ = (
+                'total_cost', 'total_utils', 'total_hip', 'total_vf', 'total_wf',
+                'total_trt', 'total_age', 'person_cnt',
+                'counter_hip', 'counter_wf', 'counter_vf',
+                )
+    def __init__(self):
+        self.counter_hip = Counter()
+        self.counter_vf = Counter()
+        self.counter_wf = Counter()
+        self.total_cost = 0
+        self.total_utils = 0
+        self.total_hip = 0
+        self.total_vf = 0
+        self.total_wf = 0
+        self.total_trt = 0
+        self.total_age = 0
+        self.person_cnt = 0
 
-# def do_group(sample_num=None, base_age=None, test_freq=None, do_ost_test=None, do_vf_test=None):
-#     print "sample_num={}, base_age={}, test_freq={}, do_ost_test={}, do_vf_test={}".format(sample_num, base_age, test_freq, do_ost_test, do_vf_test)
-#     counter_health = Counter()
-#     counter_hip = Counter()
-#     counter_vf = Counter()
-#     counter_wf = Counter()
-#     total_cost = 0
-#     total_utils = 0
-#     total_hip = 0
-#     total_vf = 0
-#     total_wf = 0
-#     total_trt = 0
-#     total_age = 0
-#     for i in xrange(sample_num):
-#         h = Human(base_age=base_age, test_freq=test_freq, do_ost_test=do_ost_test, do_vf_test=do_vf_test)
-#         h.do_life()
-#         total_cost += h.acc_cost
-#         total_utils += h.acc_utils
-#         total_hip += h.hip_cnt
-#         total_vf += h.vf_cnt
-#         total_wf += h.wf_cnt
-#         total_trt += h.trt_cnt
-#         total_age += h.age
-#         counter_hip[h.hip_cnt] +=1
-#         counter_vf[h.vf_cnt] +=1
-#         counter_wf[h.wf_cnt] +=1
-#         if (not h.ost) and (not h.vfa):
-#             counter_health[('no_ost_no_vfa')] += 1
-#         elif (not h.ost) and h.vfa:
-#             counter_health[('no_ost_vfa')] += 1
-#         elif h.ost and (not h.vfa):
-#             counter_health[('ost_no_vfa')] += 1
-#         elif h.ost and h.vfa:
-#             counter_health[('ost_vfa')] += 1
-#         if i%1000 == 0:
-#             sys.stdout.write('.')
-#             sys.stdout.flush()
+    def __str__(self):
+        ret = []
+        for slot in self.__slots__:
+            value = getattr(self, slot)
+            ret.append("{}={:6}".format(slot, value))
+        return ','.join(ret)
+
+    def __iadd__(self, other):
+        for slot in self.__slots__:
+            value = getattr(self, slot)
+            other_value = getattr(other, slot)
+            setattr(self, slot, value + other_value)
+        return self
+
+    def __add__(self, other):
+        ret = GroupResult()
+        for slot in self.__slots__:
+            value = getattr(self, slot)
+            other_value = getattr(other, slot)
+            setattr(self, slot, value + other_value)
+        return ret
+
+
+
+def do_group((sample_num, base_age, test_freq, strategy)):
+    print "sample_num={}, strategy={}".format(sample_num, strategy)
+    result = GroupResult()
+    for i in xrange(sample_num):
+        h = Human(base_age=base_age,test_freq=test_freq, strategy=strategy)
+        h.do_life()
+        result.person_cnt += 1
+        result.total_cost += h.total_cost
+        result.total_utils += h.total_utils
+        result.total_hip += h.hip_cnt
+        result.total_vf += h.vf_cnt
+        result.total_wf += h.wf_cnt
+        result.total_trt += h.trt_cnt
+        result.total_age += h.age
+        result.counter_hip[h.hip_cnt] +=1
+        result.counter_vf[h.vf_cnt] +=1
+        result.counter_wf[h.wf_cnt] +=1
+
+        if i & 0xfff == 0:
+            sys.stdout.write('.')
+            sys.stdout.flush()
+
+        # if (not h.ost) and (not h.vfa):
+        #     counter_health[('no_ost_no_vfa')] += 1
+        # elif (not h.ost) and h.vfa:
+        #     counter_health[('no_ost_vfa')] += 1
+        # elif h.ost and (not h.vfa):
+        #     counter_health[('ost_no_vfa')] += 1
+        # elif h.ost and h.vfa:
+        #     counter_health[('ost_vfa')] += 1
+        # if i%1000 == 0:
+        #     sys.stdout.write('.')
+        #     sys.stdout.flush()
+    return result
 
 
 #     ave_cost = total_cost/sample_num
@@ -626,17 +668,34 @@ class Human(object):
 
 if __name__ == '__main__':
     import argparse
+    cpu_count = multiprocessing.cpu_count()
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--strategy', type=int, choices=[0, 1, 2, 3])
-    parser.add_argument("--log_level", type=str, choices=['debug'])
-    args = parser.parse_args()
-    if args.log_level == 'debug':
-        print("set debug logger")
-        logging.basicConfig(level=logging.DEBUG)
-        Human.log.setLevel(logging.INFO)
-    Human.strategy = args.strategy
-    h = Human(65)
-    h.do_life()
+    data= []
+    population = 100000
+    for _ in xrange(cpu_count):
+        data.append((population/cpu_count, 64, 5, 0))
+
+
+    p = multiprocessing.Pool(cpu_count)
+    results = p.map(do_group, data)
+    total = GroupResult()
+    for result in results:
+        print result
+        total += result
+
+    print total
+
+
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('--strategy', type=int, choices=[0, 1, 2, 3])
+    # parser.add_argument("--log_level", type=str, choices=['debug'])
+    # args = parser.parse_args()
+    # if args.log_level == 'debug':
+    #     print("set debug logger")
+    #     logging.basicConfig(level=logging.DEBUG)
+    #     Human.log.setLevel(logging.INFO)
+    # Human.strategy = args.strategy
+    # h = Human(65)
+    # h.do_life()
 
 
