@@ -608,8 +608,8 @@ class GroupResult(object):
         for slot in self.average_list:
             name = 'total_' + slot
             value = getattr(self, name)
-            ret.append("average_{}={}".format(slot, value*1.0/self.person_cnt))
-        return ','.join(ret)
+            ret.append("average_{}={:10.4f}".format(slot, value*1.0/self.person_cnt))
+        return ',    '.join(ret)
 
 
 
@@ -662,8 +662,10 @@ if __name__ == '__main__':
         # print result
         total += result
     print ''
-    print total
+    # print total
     print total.average()
+    print ''
+    print ''
 
 
     # parser = argparse.ArgumentParser()
