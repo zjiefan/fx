@@ -561,20 +561,23 @@ class Human(object):
 
 class GroupResult(object):
     __slots__ = (
-                'total_cost', 'total_utils', 'total_hip', 'total_vf', 'total_wf',
-                'total_trt', 'total_age', 'person_cnt',
+                'total_cost', 'total_utils', 'total_hip_cnt', 'total_vf_cnt', 'total_wf_cnt',
+                'total_trt_cnt', 'total_age', 'person_cnt',
                 'counter_hip', 'counter_wf', 'counter_vf',
                 )
+
+    average_list = ('cost', 'utils', 'hip_cnt', 'vf_cnt', 'wf_cnt', 'trt_cnt', 'age')
+
     def __init__(self):
         self.counter_hip = Counter()
         self.counter_vf = Counter()
         self.counter_wf = Counter()
         self.total_cost = 0
         self.total_utils = 0
-        self.total_hip = 0
-        self.total_vf = 0
-        self.total_wf = 0
-        self.total_trt = 0
+        self.total_hip_cnt = 0
+        self.total_vf_cnt = 0
+        self.total_wf_cnt = 0
+        self.total_trt_cnt = 0
         self.total_age = 0
         self.person_cnt = 0
 
@@ -600,6 +603,14 @@ class GroupResult(object):
             setattr(self, slot, value + other_value)
         return ret
 
+    def average(self):
+        ret = []
+        for slot in self.average_list:
+            name = 'total_' + slot
+            value = getattr(self, name)
+            ret.append("average_{}={}".format(slot, value*1.0/self.person_cnt))
+        return ','.join(ret)
+
 
 
 def do_group((sample_num, base_age, test_freq, strategy)):
@@ -611,10 +622,10 @@ def do_group((sample_num, base_age, test_freq, strategy)):
         result.person_cnt += 1
         result.total_cost += h.total_cost
         result.total_utils += h.total_utils
-        result.total_hip += h.hip_cnt
-        result.total_vf += h.vf_cnt
-        result.total_wf += h.wf_cnt
-        result.total_trt += h.trt_cnt
+        result.total_hip_cnt += h.hip_cnt
+        result.total_vf_cnt += h.vf_cnt
+        result.total_wf_cnt += h.wf_cnt
+        result.total_trt_cnt += h.trt_cnt
         result.total_age += h.age
         result.counter_hip[h.hip_cnt] +=1
         result.counter_vf[h.vf_cnt] +=1
@@ -624,66 +635,33 @@ def do_group((sample_num, base_age, test_freq, strategy)):
             sys.stdout.write('.')
             sys.stdout.flush()
 
-        # if (not h.ost) and (not h.vfa):
-        #     counter_health[('no_ost_no_vfa')] += 1
-        # elif (not h.ost) and h.vfa:
-        #     counter_health[('no_ost_vfa')] += 1
-        # elif h.ost and (not h.vfa):
-        #     counter_health[('ost_no_vfa')] += 1
-        # elif h.ost and h.vfa:
-        #     counter_health[('ost_vfa')] += 1
-        # if i%1000 == 0:
-        #     sys.stdout.write('.')
-        #     sys.stdout.flush()
     return result
-
-
-#     ave_cost = total_cost/sample_num
-#     ave_utils = total_utils/sample_num/2
-#     ave_age = total_age/sample_num
-#     health_str = "no_ost_no_vfa={:8d}, no_ost_vfa={:8d}, ost_no_vfa={:8d}, ost_vfa={:8d}".format(counter_health['no_ost_no_vfa'], counter_health['no_ost_vfa'], counter_health['ost_no_vfa'], counter_health['ost_vfa'])
-#     main_result = "samples={}, test_freq={}, do_ost_test={:8s}, do_vf_test={:8s}, ave_cost={:14.4f}, ave_utils={:14.4f}, total_hip={:8}, total_vf={:8}, total_wf={:8}, total_trt={:8}, ave_age={:4}".format(sample_num, test_freq, str(do_ost_test), str(do_vf_test), ave_cost, ave_utils, total_hip, total_vf, total_wf, total_trt, ave_age)
-#     print ""
-#     print "{:230s} {}".format(main_result, health_str)
-#     print counter_health
-#     print 'hip cnt {}'.format(counter_hip)
-#     print 'vf  cnt {}'.format(counter_vf)
-#     print 'wf  cnt {}'.format(counter_wf)
-#     print ""
-
-
-
-# def run_groups():
-#     SAMPLE_NUM = 1000*490
-#     do_group(SAMPLE_NUM, test_freq=5, do_ost_test=False, do_vf_test=False)
-#     do_group(SAMPLE_NUM, test_freq=5, do_ost_test=True, do_vf_test=False)
-#     do_group(SAMPLE_NUM, test_freq=5, do_ost_test=True, do_vf_test=True)
-
-# def run_one_person(base_age=None, test_freq=None, do_ost_test=None, do_vf_test=None):
-#     print "base_age={}, test_freq={}, do_ost_test={}, do_vf_test={}".format(base_age, test_freq, do_ost_test, do_vf_test)
-#     h = Human(base_age=base_age, test_freq=test_freq, do_ost_test=do_ost_test, do_vf_test=do_vf_test)
-#     h.do_life(prt=True)
-
-
 
 if __name__ == '__main__':
     import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--strategy', type=int, choices=[0, 1, 2, 3], required=True)
+    parser.add_argument("--population", type=int, required=True)
+    parser.add_argument("--start_age", type=int, required=True)
+    parser.add_argument("--test_freq", type=int, required=True)
+    args = parser.parse_args()
+
     cpu_count = multiprocessing.cpu_count()
 
     data= []
-    population = 100000
     for _ in xrange(cpu_count):
-        data.append((population/cpu_count, 64, 5, 0))
+        data.append((args.population/cpu_count, args.start_age, args.test_freq, args.strategy))
 
 
     p = multiprocessing.Pool(cpu_count)
     results = p.map(do_group, data)
     total = GroupResult()
     for result in results:
-        print result
+        # print result
         total += result
 
     print total
+    print total.average()
 
 
     # parser = argparse.ArgumentParser()
