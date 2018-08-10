@@ -614,7 +614,7 @@ class GroupResult(object):
 
 
 def do_group((sample_num, base_age, test_freq, strategy)):
-    print "sample_num={}, strategy={}".format(sample_num, strategy)
+    # print "sample_num={}, strategy={}".format(sample_num, strategy)
     result = GroupResult()
     for i in xrange(sample_num):
         h = Human(base_age=base_age,test_freq=test_freq, strategy=strategy)
@@ -647,10 +647,12 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     cpu_count = multiprocessing.cpu_count()
+    per_cpu_run = args.population/cpu_count
+    print "with {} cpu(s), each cpu process {} persons".format(cpu_count, per_cpu_run)
 
     data= []
     for _ in xrange(cpu_count):
-        data.append((args.population/cpu_count, args.start_age, args.test_freq, args.strategy))
+        data.append((per_cpu_run, args.start_age, args.test_freq, args.strategy))
 
 
     p = multiprocessing.Pool(cpu_count)
@@ -659,7 +661,7 @@ if __name__ == '__main__':
     for result in results:
         # print result
         total += result
-
+    print ''
     print total
     print total.average()
 
