@@ -1,7 +1,6 @@
 import os
 import sys
 import logging
-import random
 import numpy as np
 import multiprocessing
 from collections import Counter
@@ -113,6 +112,7 @@ def get_utility(fx, age):
 
 class Human(object):
     __slots__ = (
+    'rand_state',
     'test_freq', 'strategy',
     'age', 'next_test', 'ost', 'vfa','fx',
     'drug_end', 'drug_holiday_end',
@@ -162,7 +162,8 @@ class Human(object):
 
         )
     log = logging.getLogger("Human")
-    def __init__(self, base_age=None, test_freq=5, strategy=None):
+    def __init__(self, rand_state=None, base_age=None, test_freq=5, strategy=None):
+        self.rand_state = rand_state
         self.test_freq = test_freq
         self.strategy = strategy
 
@@ -223,8 +224,8 @@ class Human(object):
 
     def set_ost_vfa(self):
         if self.ost is None:
-            p = random.random()
-            pv = random.random()
+            p = self.rand_state.random_sample()
+            pv = self.rand_state.random_sample()
             if self.age < 70:
                 band = 60
             elif self.age < 80:
@@ -265,14 +266,14 @@ class Human(object):
                     raise Exception("not enough lbm1")
                 if self.ost == 'lbm1':
                     ost_lbm1_to_sick = sick_inc/last_lbm1_preval
-                    p = random.random()
+                    p = self.rand_state.random_sample()
                     self.log.debug("prob that lbm1 turn sick at %d is %.5f, get prob %.5f", self.age, ost_lbm1_to_sick, p)
                     if p < ost_lbm1_to_sick:
                         self.log.debug("turn lbm1 to sick")
                         self.ost = 'sick'
                         # ost changes from lbm1 to sick, patients are more likely to have vfa.
                         if not self.vfa:
-                            p = random.random()
+                            p = self.rand_state.random_sample()
                             vfa_inc = (VFA_OST_SICK - VFA_OST_LBM1)/(1-VFA_OST_LBM1)
                             self.log.debug("current vfa is false, prob to turn True is %.5f, get prob %.5f", vfa_inc, p)
                             self.vfa = p < vfa_inc
@@ -298,7 +299,7 @@ class Human(object):
                     self.ost = 'lbm1'
                     if not self.vfa:
                         vfa_inc = (VFA_OST_LBM1 - VFA_OST_LBL)/(1-VFA_OST_LBL)
-                        pv = random.random()
+                        pv = self.rand_state.random_sample()
                         self.log.debug("current vfa is false, prob to turn True is %.5f, get prob %.5f", vfa_inc, pv)
                         self.vfa = pv < vfa_inc
                     self.log.debug("return new ost %s, vfa %s", self.ost, self.vfa)
@@ -313,13 +314,13 @@ class Human(object):
                 ost_normal_to_lbl = lbl_needed_from_normal/old_normal_preval
                 self.log.debug("at age %d, old normal preval is %.5f, lbm1 takes %.5f, or prob %.5f, lbl takes %.5f, or prob %.5f",
                 self.age, old_normal_preval, lbm1_needed_from_normal, ost_normal_to_lbm1, lbl_needed_from_normal, ost_normal_to_lbl)
-                p = random.random()
+                p = self.rand_state.random_sample()
                 self.log.debug("get prob %.5f", p)
                 if p < ost_normal_to_lbm1:
                     self.log.debug("promote ost to lbm1")
                     self.ost = 'lbm1'
                     if not self.vfa:
-                        pv = random.random()
+                        pv = self.rand_state.random_sample()
                         vfa_inc = (VFA_OST_LBM1 - VFA_OST_NORMAL)/(1-VFA_OST_NORMAL)
                         self.log.debug("current vfa is false, prob to turn True is %.5f, get prob %.5f", vfa_inc, pv)
                         self.vfa = pv < vfa_inc
@@ -328,7 +329,7 @@ class Human(object):
                 elif p < ost_normal_to_lbm1 + ost_normal_to_lbl:
                     self.ost = 'lbl'
                     if not self.vfa:
-                        pv = random.random()
+                        pv = self.rand_state.random_sample()
                         vfa_inc = (VFA_OST_LBL - VFA_OST_NORMAL)/(1-VFA_OST_NORMAL)
                         self.log.debug("current vfa is false, prob to turn True is %.5f, get prob %.5f", vfa_inc, pv)
                         self.vfa = pv < vfa_inc
@@ -504,13 +505,13 @@ class Human(object):
         self.log.debug("get trans prob no_fx %.5f, hip %.5f, vf %.5f, wf %.5f, natual_death_rate %.5f, fx_death_rate %.5f", prob_no_fix, prob_hip, prob_vf, prob_wf, natual_death_rate, fx_death_rate)
         self.prob_vector = "(no=%6.3f%% h%6.3f%% v%6.3f%% w%6.3f%% n_death%6.3f%% f_death%6.3f%%)"%(prob_no_fix*100, prob_hip*100, prob_vf*100, prob_wf*100, natual_death_rate*100, fx_death_rate*100)
         nature_death = False
-        if random.random() < natual_death_rate:
+        if self.rand_state.random_sample() < natual_death_rate:
             nature_death = True
 
         if nature_death:
             self.fx = 'death'
         else:
-            self.fx = np.random.choice(['no_fx', 'hip', 'vf', 'wf', 'death'], p=[prob_no_fix, prob_hip, prob_vf, prob_wf, fx_death_rate])
+            self.fx = self.rand_state.choice(['no_fx', 'hip', 'vf', 'wf', 'death'], p=[prob_no_fix, prob_hip, prob_vf, prob_wf, fx_death_rate])
         self.log.debug("transition result %s", self.fx)
 
 
@@ -616,8 +617,9 @@ class GroupResult(object):
 def do_group((sample_num, base_age, test_freq, strategy)):
     # print "sample_num={}, strategy={}".format(sample_num, strategy)
     result = GroupResult()
+    rand_state = np.random.RandomState(1)
     for i in xrange(sample_num):
-        h = Human(base_age=base_age,test_freq=test_freq, strategy=strategy)
+        h = Human(rand_state=rand_state, base_age=base_age,test_freq=test_freq, strategy=strategy)
         h.do_life()
         result.person_cnt += 1
         result.total_cost += h.total_cost
@@ -659,7 +661,7 @@ if __name__ == '__main__':
     results = p.map(do_group, data)
     total = GroupResult()
     for result in results:
-        # print result
+        print result
         total += result
     print ''
     # print total
