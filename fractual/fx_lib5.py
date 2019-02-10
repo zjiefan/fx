@@ -425,7 +425,14 @@ class Human(object):
 
         if do_test:
             self.ost_result = self.ost
-            if self.ost_result in ['sick','lbm']:
+            if self.strategy == 2:
+                vfa_types = ('sick', 'lbm1')
+            elif self.strategy == 3:
+                vfa_types = ('sick', 'lbm1', 'lbl')
+            else:
+                self.log.error("unexpected strategy %d", self.strategy)
+                raise Exception("unknown strategy")
+            if self.ost_result in vfa_types:
                 self.vfa_result = get_vfa_test_result(self.vfa)
                 if self.vfa_result == 'Pos':
                     self.vfa_trt_sop = True
@@ -630,7 +637,7 @@ def do_group((sample_num, base_age, test_freq, strategy)):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--strategy', type=int, choices=[0, 1, 2, 3], required=True)
+    parser.add_argument('--strategy', type=int, choices=[2, 3], required=True)
     parser.add_argument("--population", type=int, required=True)
     parser.add_argument("--start_age", type=int, required=True)
     parser.add_argument("--test_freq", type=int, required=True)
