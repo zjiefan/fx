@@ -651,6 +651,7 @@ if __name__ == '__main__':
 
     cpu_count = multiprocessing.cpu_count()
     per_cpu_run = args.population/cpu_count
+    print "strategy {}. population {}, start_age {}, test_freq {}, vfa_treatment_prob {} ".format(args.strategy, args.population, args.start_age, args.test_freq, args.vfa_treatment_prob)
     print "with {} cpu(s), each cpu process {} persons".format(cpu_count, per_cpu_run)
 
     data= []
