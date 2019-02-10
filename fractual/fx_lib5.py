@@ -127,7 +127,8 @@ class Human(object):
 
     'total_utils', 'total_cost', 'final_age',
     'vf_cnt', 'hip_cnt', 'wf_cnt', 'trt_cnt',
-    'prob_vector'
+    'prob_vector',
+    'vfa_treatment_prob'
 
     )
 
@@ -162,9 +163,10 @@ class Human(object):
 
         )
     log = logging.getLogger("Human")
-    def __init__(self, base_age=None, test_freq=5, strategy=None):
+    def __init__(self, base_age=None, test_freq=5, strategy=None, vfa_treatment_prob=None):
         self.test_freq = test_freq
         self.strategy = strategy
+        self.vfa_treatment_prob = vfa_treatment_prob
 
         self.age = base_age
         self.next_test = None
@@ -435,7 +437,7 @@ class Human(object):
             if self.ost_result in vfa_types:
                 self.vfa_result = get_vfa_test_result(self.vfa)
                 if self.vfa_result == 'Pos':
-                    self.vfa_trt_sop = True
+                    self.vfa_trt_sop = (random.random() < self.vfa_treatment_prob)
                 elif self.ost_result == 'sick':
                     self.sick_trt_sop = take_ost_trt()
 
@@ -610,11 +612,11 @@ class GroupResult(object):
 
 
 
-def do_group((sample_num, base_age, test_freq, strategy)):
+def do_group((sample_num, base_age, test_freq, strategy,vfa_treatment_prob)):
     # print "sample_num={}, strategy={}".format(sample_num, strategy)
     result = GroupResult()
     for i in xrange(sample_num):
-        h = Human(base_age=base_age,test_freq=test_freq, strategy=strategy)
+        h = Human(base_age=base_age,test_freq=test_freq, strategy=strategy, vfa_treatment_prob=vfa_treatment_prob)
         h.do_life()
         result.person_cnt += 1
         result.total_cost += h.total_cost
@@ -641,6 +643,7 @@ if __name__ == '__main__':
     parser.add_argument("--population", type=int, required=True)
     parser.add_argument("--start_age", type=int, required=True)
     parser.add_argument("--test_freq", type=int, required=True)
+    parser.add_argument("--vfa_treatment_prob", type=float, required=True)
     args = parser.parse_args()
 
     cpu_count = multiprocessing.cpu_count()
@@ -649,7 +652,7 @@ if __name__ == '__main__':
 
     data= []
     for _ in xrange(cpu_count):
-        data.append((per_cpu_run, args.start_age, args.test_freq, args.strategy))
+        data.append((per_cpu_run, args.start_age, args.test_freq, args.strategy, args.vfa_treatment_prob))
 
 
     p = multiprocessing.Pool(cpu_count)
