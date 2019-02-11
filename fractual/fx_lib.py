@@ -439,7 +439,7 @@ class Human(object):
                 else:
                     self.log.error("unexpected strategy %d", self.strategy)
                     raise Exception("unknown strategy")
-                if self.sick_trt_sop == False or self.ost_result in lbm_types:
+                if self.ost_result in lbm_types:
                     self.vfa_result = get_vfa_test_result(self.vfa)
                     if self.vfa_result == 'Pos':
                             self.vfa_trt_sop = (random.random() < self.vfa_treatment_prob)

@@ -427,9 +427,9 @@ class Human(object):
 
         if do_test:
             self.ost_result = self.ost
-            if self.strategy == 2:
+            if self.strategy == 4:
                 vfa_types = ('sick', 'lbm1')
-            elif self.strategy == 3:
+            elif self.strategy == 5:
                 vfa_types = ('sick', 'lbm1', 'lbl')
             else:
                 self.log.error("unexpected strategy %d", self.strategy)
@@ -639,7 +639,7 @@ def do_group((sample_num, base_age, test_freq, strategy,vfa_treatment_prob)):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--strategy', type=int, choices=[2, 3], required=True)
+    parser.add_argument('--strategy', type=int, choices=[4, 5], required=True)
     parser.add_argument("--population", type=int, required=True)
     parser.add_argument("--start_age", type=int, required=True)
     parser.add_argument("--test_freq", type=int, required=True)
@@ -648,7 +648,7 @@ if __name__ == '__main__':
 
     cpu_count = multiprocessing.cpu_count()
     per_cpu_run = args.population/cpu_count
-    print "strategy {}. population {}, start_age {}, test_freq {}, vfa_treatment_prob {} ".format(args.strategy + 4, args.population, args.start_age, args.test_freq, args.vfa_treatment_prob)
+    print "strategy {}. population {}, start_age {}, test_freq {}, vfa_treatment_prob {} ".format(args.strategy, args.population, args.start_age, args.test_freq, args.vfa_treatment_prob)
     print "with {} cpu(s), each cpu process {} persons".format(cpu_count, per_cpu_run)
 
     data= []
