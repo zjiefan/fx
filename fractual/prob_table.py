@@ -277,7 +277,12 @@ def take_ost_trt():
 VFA_SENSI = 0.85
 VFA_SPEC = 0.92
 
-def get_vfa_test_result(vfa):
+def get_vfa_test_result(vfa, is_perfect):
+    if is_perfect:
+        if vfa:
+            return 'Pos'
+        else:
+            return 'Neg'
     p = random.random()
     if vfa:
         if p < VFA_SENSI:

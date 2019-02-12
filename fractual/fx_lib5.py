@@ -18,11 +18,12 @@ DISCOUNT_RATE = 0.03
 DISCOUNT = 1-DISCOUNT_RATE/2
 EFF_DELAY = 2
 
+VF_SCALE = float(os.environ['VF_SCALE'])
 
-VFA_OST_NORMAL = 0.085
-VFA_OST_LBL = 0.1
-VFA_OST_LBM1 = 0.157
-VFA_OST_SICK = 0.343
+VFA_OST_NORMAL = 0.085 * VF_SCALE
+VFA_OST_LBL = 0.1 * VF_SCALE
+VFA_OST_LBM1 = 0.157 * VF_SCALE
+VFA_OST_SICK = 0.343 * VF_SCALE
 
 
 VFA_PREVAL = {}
@@ -128,7 +129,8 @@ class Human(object):
     'total_utils', 'total_cost', 'final_age',
     'vf_cnt', 'hip_cnt', 'wf_cnt', 'trt_cnt',
     'prob_vector',
-    'vfa_treatment_prob'
+    'vfa_treatment_prob',
+    'drug_scale', 'perfect_vf',
 
     )
 
@@ -163,10 +165,12 @@ class Human(object):
 
         )
     log = logging.getLogger("Human")
-    def __init__(self, base_age=None, test_freq=5, strategy=None, vfa_treatment_prob=None):
+    def __init__(self, base_age=None, test_freq=5, strategy=None, vfa_treatment_prob=None, drug_scale=1.0, perfect_vf=0):
         self.test_freq = test_freq
         self.strategy = strategy
         self.vfa_treatment_prob = vfa_treatment_prob
+        self.drug_scale=drug_scale
+        self.perfect_vf = perfect_vf
 
         self.age = base_age
         self.next_test = None
@@ -425,7 +429,7 @@ class Human(object):
             do_test = False
 
 
-        if do_test:
+        if do_test and self.strategy:
             self.ost_result = self.ost
             if self.strategy == 4:
                 vfa_types = ('sick', 'lbm1')
@@ -435,7 +439,7 @@ class Human(object):
                 self.log.error("unexpected strategy %d", self.strategy)
                 raise Exception("unknown strategy")
             if self.ost_result in vfa_types:
-                self.vfa_result = get_vfa_test_result(self.vfa)
+                self.vfa_result = get_vfa_test_result(self.vfa, self.perfect_vf)
                 if self.vfa_result == 'Pos':
                     self.vfa_trt_sop = (random.random() < self.vfa_treatment_prob)
                 elif self.ost_result == 'sick':
@@ -469,7 +473,7 @@ class Human(object):
         if self.vfa_result is not None:
             self.inc_cost += vfa_cost()
         if self.trt:
-            self.inc_cost += drug_cost()
+            self.inc_cost += drug_cost()*self.drug_scale
             self.trt_cnt += 1
 
         if self.fx not in ['no_fx', 'death']:
@@ -612,11 +616,11 @@ class GroupResult(object):
 
 
 
-def do_group((sample_num, base_age, test_freq, strategy,vfa_treatment_prob)):
+def do_group((sample_num, base_age, test_freq, strategy,vfa_treatment_prob, drug_scale, perfect_vf)):
     # print "sample_num={}, strategy={}".format(sample_num, strategy)
     result = GroupResult()
     for i in xrange(sample_num):
-        h = Human(base_age=base_age,test_freq=test_freq, strategy=strategy, vfa_treatment_prob=vfa_treatment_prob)
+        h = Human(base_age=base_age,test_freq=test_freq, strategy=strategy, vfa_treatment_prob=vfa_treatment_prob, drug_scale=drug_scale, perfect_vf=perfect_vf)
         h.do_life()
         result.person_cnt += 1
         result.total_cost += h.total_cost
@@ -644,16 +648,20 @@ if __name__ == '__main__':
     parser.add_argument("--start_age", type=int, required=True)
     parser.add_argument("--test_freq", type=int, required=True)
     parser.add_argument("--vfa_treatment_prob", type=float, required=True)
+    parser.add_argument("--drug_scale", type=float, required=True)
+    parser.add_argument("--perfect_vf", type=int, required=True)
+
     args = parser.parse_args()
 
     cpu_count = multiprocessing.cpu_count()
     per_cpu_run = args.population/cpu_count
-    print "strategy {}. population {}, start_age {}, test_freq {}, vfa_treatment_prob {} ".format(args.strategy, args.population, args.start_age, args.test_freq, args.vfa_treatment_prob)
+    print "strategy {}, population {}, start_age {}, test_freq {}, vfa_treatment_prob {}, drug_scale {}, perfect_vf {} vf_scale {}".format(
+        args.strategy, args.population, args.start_age, args.test_freq, args.vfa_treatment_prob, args.drug_scale, args.perfect_vf, VF_SCALE)
     print "with {} cpu(s), each cpu process {} persons".format(cpu_count, per_cpu_run)
 
     data= []
     for _ in xrange(cpu_count):
-        data.append((per_cpu_run, args.start_age, args.test_freq, args.strategy, args.vfa_treatment_prob))
+        data.append((per_cpu_run, args.start_age, args.test_freq, args.strategy, args.vfa_treatment_prob, args.drug_scale, args.perfect_vf))
 
 
     p = multiprocessing.Pool(cpu_count)

@@ -1,51 +1,151 @@
 set -x
-python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=0 --vfa_treatment_prob 1.0
-python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=1 --vfa_treatment_prob 1.0
-python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=2 --vfa_treatment_prob 1.0
-python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=3 --vfa_treatment_prob 1.0
-python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=5  --strategy=4 --vfa_treatment_prob 1.0
-python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=5  --strategy=5 --vfa_treatment_prob 1.0
-python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=0 --vfa_treatment_prob 1.0
-python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=1 --vfa_treatment_prob 1.0
-python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=2 --vfa_treatment_prob 1.0
-python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=3 --vfa_treatment_prob 1.0
-python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=10 --strategy=4 --vfa_treatment_prob 1.0
-python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=10 --strategy=5 --vfa_treatment_prob 1.0
-python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=0 --vfa_treatment_prob 1.0
-python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=1 --vfa_treatment_prob 1.0
-python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=2 --vfa_treatment_prob 1.0
-python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=3 --vfa_treatment_prob 1.0
-python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=5  --strategy=4 --vfa_treatment_prob 1.0
-python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=5  --strategy=5 --vfa_treatment_prob 1.0
-python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=0 --vfa_treatment_prob 1.0
-python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=1 --vfa_treatment_prob 1.0
-python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=2 --vfa_treatment_prob 1.0
-python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=3 --vfa_treatment_prob 1.0
-python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=10 --strategy=4 --vfa_treatment_prob 1.0
-python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=10 --strategy=5 --vfa_treatment_prob 1.0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=0 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=1 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=2 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=3 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=5  --strategy=4 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=5  --strategy=5 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=0 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=1 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=2 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=3 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=10 --strategy=4 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=10 --strategy=5 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=0 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=1 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=2 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=3 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=5  --strategy=4 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=5  --strategy=5 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=0 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=1 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=2 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=3 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=10 --strategy=4 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=10 --strategy=5 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
 
-python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=0 --vfa_treatment_prob 0.25
-python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=1 --vfa_treatment_prob 0.25
-python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=2 --vfa_treatment_prob 0.25
-python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=3 --vfa_treatment_prob 0.25
-python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=5  --strategy=4 --vfa_treatment_prob 0.25
-python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=5  --strategy=5 --vfa_treatment_prob 0.25
-python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=0 --vfa_treatment_prob 0.25
-python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=1 --vfa_treatment_prob 0.25
-python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=2 --vfa_treatment_prob 0.25
-python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=3 --vfa_treatment_prob 0.25
-python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=10 --strategy=4 --vfa_treatment_prob 0.25
-python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=10 --strategy=5 --vfa_treatment_prob 0.25
-python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=0 --vfa_treatment_prob 0.25
-python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=1 --vfa_treatment_prob 0.25
-python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=2 --vfa_treatment_prob 0.25
-python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=3 --vfa_treatment_prob 0.25
-python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=5  --strategy=4 --vfa_treatment_prob 0.25
-python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=5  --strategy=5 --vfa_treatment_prob 0.25
-python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=0 --vfa_treatment_prob 0.25
-python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=1 --vfa_treatment_prob 0.25
-python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=2 --vfa_treatment_prob 0.25
-python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=3 --vfa_treatment_prob 0.25
-python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=10 --strategy=4 --vfa_treatment_prob 0.25
-python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=10 --strategy=5 --vfa_treatment_prob 0.25
+VF_SCALE=0.5 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=0 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=0.5 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=1 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=0.5 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=2 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=0.5 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=3 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=0.5 python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=5  --strategy=4 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=0.5 python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=5  --strategy=5 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=0.5 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=0 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=0.5 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=1 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=0.5 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=2 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=0.5 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=3 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=0.5 python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=10 --strategy=4 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=0.5 python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=10 --strategy=5 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=0.5 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=0 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=0.5 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=1 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=0.5 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=2 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=0.5 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=3 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=0.5 python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=5  --strategy=4 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=0.5 python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=5  --strategy=5 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=0.5 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=0 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=0.5 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=1 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=0.5 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=2 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=0.5 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=3 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=0.5 python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=10 --strategy=4 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=0.5 python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=10 --strategy=5 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+
+VF_SCALE=1.5 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=0 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.5 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=1 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.5 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=2 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.5 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=3 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.5 python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=5  --strategy=4 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.5 python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=5  --strategy=5 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.5 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=0 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.5 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=1 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.5 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=2 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.5 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=3 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.5 python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=10 --strategy=4 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.5 python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=10 --strategy=5 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.5 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=0 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.5 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=1 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.5 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=2 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.5 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=3 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.5 python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=5  --strategy=4 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.5 python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=5  --strategy=5 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.5 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=0 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.5 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=1 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.5 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=2 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.5 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=3 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.5 python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=10 --strategy=4 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.5 python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=10 --strategy=5 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 0
+
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=0 --vfa_treatment_prob 1.0 --drug_scale 1.25 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=1 --vfa_treatment_prob 1.0 --drug_scale 1.25 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=2 --vfa_treatment_prob 1.0 --drug_scale 1.25 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=3 --vfa_treatment_prob 1.0 --drug_scale 1.25 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=5  --strategy=4 --vfa_treatment_prob 1.0 --drug_scale 1.25 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=5  --strategy=5 --vfa_treatment_prob 1.0 --drug_scale 1.25 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=0 --vfa_treatment_prob 1.0 --drug_scale 1.25 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=1 --vfa_treatment_prob 1.0 --drug_scale 1.25 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=2 --vfa_treatment_prob 1.0 --drug_scale 1.25 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=3 --vfa_treatment_prob 1.0 --drug_scale 1.25 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=10 --strategy=4 --vfa_treatment_prob 1.0 --drug_scale 1.25 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=10 --strategy=5 --vfa_treatment_prob 1.0 --drug_scale 1.25 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=0 --vfa_treatment_prob 1.0 --drug_scale 1.25 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=1 --vfa_treatment_prob 1.0 --drug_scale 1.25 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=2 --vfa_treatment_prob 1.0 --drug_scale 1.25 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=3 --vfa_treatment_prob 1.0 --drug_scale 1.25 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=5  --strategy=4 --vfa_treatment_prob 1.0 --drug_scale 1.25 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=5  --strategy=5 --vfa_treatment_prob 1.0 --drug_scale 1.25 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=0 --vfa_treatment_prob 1.0 --drug_scale 1.25 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=1 --vfa_treatment_prob 1.0 --drug_scale 1.25 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=2 --vfa_treatment_prob 1.0 --drug_scale 1.25 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=3 --vfa_treatment_prob 1.0 --drug_scale 1.25 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=10 --strategy=4 --vfa_treatment_prob 1.0 --drug_scale 1.25 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=10 --strategy=5 --vfa_treatment_prob 1.0 --drug_scale 1.25 --perfect_vf 0
+
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=0 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 1
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=1 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 1
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=2 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 1
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=3 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 1
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=5  --strategy=4 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 1
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=5  --strategy=5 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 1
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=0 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 1
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=1 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 1
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=2 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 1
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=3 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 1
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=10 --strategy=4 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 1
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=10 --strategy=5 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 1
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=0 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 1
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=1 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 1
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=2 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 1
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=3 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 1
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=5  --strategy=4 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 1
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=5  --strategy=5 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 1
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=0 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 1
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=1 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 1
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=2 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 1
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=3 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 1
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=10 --strategy=4 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 1
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=10 --strategy=5 --vfa_treatment_prob 1.0 --drug_scale 1.0 --perfect_vf 1
+
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=0 --vfa_treatment_prob 0.3 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=1 --vfa_treatment_prob 0.3 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=2 --vfa_treatment_prob 0.3 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=5  --strategy=3 --vfa_treatment_prob 0.3 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=5  --strategy=4 --vfa_treatment_prob 0.3 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=5  --strategy=5 --vfa_treatment_prob 0.3 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=0 --vfa_treatment_prob 0.3 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=1 --vfa_treatment_prob 0.3 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=2 --vfa_treatment_prob 0.3 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=65 --test_freq=10 --strategy=3 --vfa_treatment_prob 0.3 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=10 --strategy=4 --vfa_treatment_prob 0.3 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=65 --test_freq=10 --strategy=5 --vfa_treatment_prob 0.3 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=0 --vfa_treatment_prob 0.3 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=1 --vfa_treatment_prob 0.3 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=2 --vfa_treatment_prob 0.3 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=5  --strategy=3 --vfa_treatment_prob 0.3 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=5  --strategy=4 --vfa_treatment_prob 0.3 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=5  --strategy=5 --vfa_treatment_prob 0.3 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=0 --vfa_treatment_prob 0.3 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=1 --vfa_treatment_prob 0.3 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=2 --vfa_treatment_prob 0.3 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib.py  --population=$1 --start_age=70 --test_freq=10 --strategy=3 --vfa_treatment_prob 0.3 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=10 --strategy=4 --vfa_treatment_prob 0.3 --drug_scale 1.0 --perfect_vf 0
+VF_SCALE=1.0 python fractual/fx_lib5.py --population=$1 --start_age=70 --test_freq=10 --strategy=5 --vfa_treatment_prob 0.3 --drug_scale 1.0 --perfect_vf 0
 
